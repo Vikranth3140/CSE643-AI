@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+from tqdm import tqdm
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -62,14 +63,12 @@ def depth_limited_search(adj_matrix, start_node, goal_node, limit, visited=None)
 
 
 def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
-    depth = 0
-    while depth <= max_depth:
+    max_depth = int(max_depth) if max_depth != float('inf') else 1000
+    for depth in tqdm(range(max_depth + 1), desc="Searching with depth limits"):
         visited = set()
         path = depth_limited_search(adj_matrix, start_node, goal_node, depth, visited)
         if path:
             return path
-        depth += 1
-
     return None
 
 
