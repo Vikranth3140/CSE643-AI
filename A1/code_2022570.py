@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+from tqdm import tqdm
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -38,9 +39,55 @@ import pickle
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 2, 9, 8, 5, 97, 98, 12]
 
-def get_ids_path(adj_matrix, start_node, goal_node):
+def is_reachable_bfs(adj_matrix, start_node, goal_node):
+    visited = set()
+    queue = [start_node]
+    while queue:
+        node = queue.pop(0)
+        if node == goal_node:
+            return True
+        visited.add(node)
+        
+        for neighbor in range(len(adj_matrix[node])):
+            if adj_matrix[node][neighbor] > 0 and neighbor not in visited:
+                queue.append(neighbor)
+    return False
 
-  return []
+
+def depth_limited_search(adj_matrix, start_node, goal_node, limit, visited=None):
+    if visited is None:
+        visited = set()
+    
+    if start_node == goal_node:
+        return [start_node]
+    
+    if limit <= 0:
+        return None
+    
+    visited.add(start_node)
+
+    for neighbor in range(len(adj_matrix[start_node])):
+        if adj_matrix[start_node][neighbor] > 0 and neighbor not in visited:
+            path = depth_limited_search(adj_matrix, neighbor, goal_node, limit - 1, visited)
+            if path:
+                return [start_node] + path
+    
+    visited.remove(start_node)
+    
+    return None
+
+
+def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
+    if not is_reachable_bfs(adj_matrix, start_node, goal_node):
+        return None
+    
+    max_depth = int(max_depth) if max_depth != float('inf') else 1000
+    for depth in tqdm(range(max_depth + 1), desc="Searching with depth limits"):
+        visited = set()
+        path = depth_limited_search(adj_matrix, start_node, goal_node, depth, visited)
+        if path:
+            return path
+    return None
 
 
 # Algorithm: Bi-Directional Search
