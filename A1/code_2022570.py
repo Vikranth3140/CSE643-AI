@@ -119,9 +119,79 @@ def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 2, 9, 8, 5, 97, 98, 12]
 
-def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
+from collections import deque
 
-  return []
+def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
+    n = len(adj_matrix)  # Number of vertices
+
+    # If start and goal nodes are the same, return the trivial path
+    if start_node == goal_node:
+        return [start_node]
+
+    # Initialize BFS data structures
+    src_queue = deque([start_node])
+    dest_queue = deque([goal_node])
+
+    src_visited = [False] * n
+    dest_visited = [False] * n
+
+    src_visited[start_node] = True
+    dest_visited[goal_node] = True
+
+    src_parent = [-1] * n
+    dest_parent = [-1] * n
+
+    # Function to perform one level of BFS
+    def bfs(queue, visited, parent, direction):
+        current = queue.popleft()
+
+        for neighbor, is_connected in enumerate(adj_matrix[current]):
+            if is_connected and not visited[neighbor]:
+                queue.append(neighbor)
+                visited[neighbor] = True
+                parent[neighbor] = current
+
+    # Check for intersection between forward and backward searches
+    def is_intersecting():
+        for i in range(n):
+            if src_visited[i] and dest_visited[i]:
+                return i
+        return -1
+
+    # Reconstruct the path after intersection
+    def construct_path(intersecting_node):
+        path = []
+
+        # Construct the path from start to intersection
+        current = intersecting_node
+        while current != -1:
+            path.append(current)
+            current = src_parent[current]
+        path.reverse()
+
+        # Construct the path from intersection to goal
+        current = dest_parent[intersecting_node]
+        while current != -1:
+            path.append(current)
+            current = dest_parent[current]
+
+        return path
+
+    # Main loop for bidirectional search
+    while src_queue and dest_queue:
+        # Expand forward from the start node
+        bfs(src_queue, src_visited, src_parent, direction='forward')
+
+        # Expand backward from the goal node
+        bfs(dest_queue, dest_visited, dest_parent, direction='backward')
+
+        # Check if searches intersect
+        intersecting_node = is_intersecting()
+
+        if intersecting_node != -1:
+            return construct_path(intersecting_node)
+
+    return None  # No path found
 
 
 # Algorithm: A* Search Algorithm
