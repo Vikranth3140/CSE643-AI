@@ -151,6 +151,10 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
                 visited[neighbor] = True
                 parent[neighbor] = current
 
+                print(f"Queue: {str(queue)}")
+                print(f"Src Queue: {str(src_queue)}")
+                print(f"Dest Queue: {str(dest_queue)}")
+
     # Check for intersection between forward and backward searches
     def is_intersecting():
         for i in range(n):
