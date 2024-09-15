@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 from tqdm import tqdm
+import heapq
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -119,9 +120,71 @@ def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 2, 9, 8, 5, 97, 98, 12]
 
-def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
+def push(queue, node, cost):
+    heapq.heappush(queue, (cost, node))
 
-  return []
+def pop(queue):
+    return heapq.heappop(queue)[1]
+
+def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
+    n = len(adj_matrix)
+
+    if start_node == goal_node:
+        return [start_node]
+
+    frontierF = [(0, start_node)]
+    frontierB = [(0, goal_node)]
+
+    reachedF = {start_node: 0}
+    reachedB = {goal_node: 0}
+
+    src_parent = [-1] * n
+    dest_parent = [-1] * n
+
+    def expand(frontier, reached, parent):
+        node = pop(frontier)
+        for neighbor, is_connected in enumerate(adj_matrix[node]):
+            if is_connected:
+                new_cost = reached[node] + 1
+                if neighbor not in reached or new_cost < reached[neighbor]:
+                    reached[neighbor] = new_cost
+                    push(frontier, neighbor, new_cost)
+                    parent[neighbor] = node
+
+    def is_intersecting():
+        for node in reachedF:
+            if node in reachedB:
+                return node
+        return -1
+
+    def construct_path(intersecting_node):
+        path = []
+
+        current = intersecting_node
+        while current != -1:
+            path.append(current)
+            current = src_parent[current]
+        path.reverse()
+
+        current = dest_parent[intersecting_node]
+        while current != -1:
+            path.append(current)
+            current = dest_parent[current]
+
+        return path
+
+    while frontierF and frontierB:
+        if frontierF[0][0] <= frontierB[0][0]:
+            expand(frontierF, reachedF, src_parent)
+        else:
+            expand(frontierB, reachedB, dest_parent)
+
+        intersecting_node = is_intersecting()
+
+        if intersecting_node != -1:
+            return construct_path(intersecting_node)
+
+    return None
 
 
 # Algorithm: A* Search Algorithm
