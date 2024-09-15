@@ -141,7 +141,7 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
     src_parent = [-1] * n
     dest_parent = [-1] * n
 
-    def expand(frontier, reached, parent, direction):
+    def expand(frontier, reached, parent):
         node = pop(frontier)
         for neighbor, is_connected in enumerate(adj_matrix[node]):
             if is_connected:
@@ -175,9 +175,9 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 
     while frontierF and frontierB:
         if frontierF[0][0] <= frontierB[0][0]:
-            expand(frontierF, reachedF, src_parent, direction='forward')
+            expand(frontierF, reachedF, src_parent)
         else:
-            expand(frontierB, reachedB, dest_parent, direction='backward')
+            expand(frontierB, reachedB, dest_parent)
 
         intersecting_node = is_intersecting()
 
