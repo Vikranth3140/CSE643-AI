@@ -145,7 +145,7 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
         node = pop(frontier)
         for neighbor, is_connected in enumerate(adj_matrix[node]):
             if is_connected:
-                new_cost = reached[node] + 1  # Here assuming uniform cost
+                new_cost = reached[node] + 1
                 if neighbor not in reached or new_cost < reached[neighbor]:
                     reached[neighbor] = new_cost
                     push(frontier, neighbor, new_cost)
