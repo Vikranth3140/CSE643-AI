@@ -326,10 +326,10 @@ def reconstruct_bidirectional_path(came_from_forward, came_from_backward, meetin
 
     # Reconstruct path from meeting point to goal (backward direction)
     path_backward = []
-    node = came_from_backward.get(meeting_point, None)
-    while node is not None:
+    node = meeting_point
+    while came_from_backward.get(node, None) is not None:
+        node = came_from_backward[node]
         path_backward.append(node)
-        node = came_from_backward.get(node, None)
 
     # Combine the two parts
     return path_forward + path_backward
