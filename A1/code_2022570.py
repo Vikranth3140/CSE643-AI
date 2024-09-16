@@ -218,60 +218,15 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 27, 9, 8, 5, 97, 28, 10, 12]
 
-# Heuristic function: Euclidean distance between two nodes based on their coordinates
 def heuristic(node1, node2, node_attributes):
     node1 = int(node1)
     node2 = int(node2)
     
-    # Access the 'x' and 'y' coordinates from the node_attributes dictionary
     x1, y1 = node_attributes[node1]['x'], node_attributes[node1]['y']
     x2, y2 = node_attributes[node2]['x'], node_attributes[node2]['y']
     
-    # Calculate and return the Euclidean distance
     return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-# Example usage in your A* algorithm
-def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
-    n = len(adj_matrix)  # Number of nodes in the graph
-
-    # Priority queue for A* search
-    open_list = []
-    heapq.heappush(open_list, (0, start_node))  # (f_cost, node)
-    
-    # To store the best known cost to reach each node
-    g_costs = {i: float('inf') for i in range(n)}
-    g_costs[start_node] = 0
-    
-    # To track the path
-    came_from = {start_node: None}
-    
-    # To store f-cost for each node
-    f_costs = {i: float('inf') for i in range(n)}
-    f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
-    
-    while open_list:
-        # Get the node with the lowest f_cost
-        current_f, current_node = heapq.heappop(open_list)
-        
-        # If the goal is reached, reconstruct and return the path
-        if current_node == goal_node:
-            return reconstruct_path(came_from, current_node)
-        
-        # Explore neighbors
-        for neighbor, is_connected in enumerate(adj_matrix[current_node]):
-            if is_connected:  # Only consider connected neighbors
-                tentative_g_cost = g_costs[current_node] + 1  # Assuming uniform cost
-                
-                # If we find a better path, update it
-                if tentative_g_cost < g_costs[neighbor]:
-                    came_from[neighbor] = current_node
-                    g_costs[neighbor] = tentative_g_cost
-                    f_costs[neighbor] = tentative_g_cost + heuristic(neighbor, goal_node, node_attributes)
-                    heapq.heappush(open_list, (f_costs[neighbor], neighbor))
-    
-    return None  # Return None if no path is found
-
-# Function to reconstruct the path from start to goal
 def reconstruct_path(came_from, current_node):
     path = []
     while current_node is not None:
@@ -280,6 +235,41 @@ def reconstruct_path(came_from, current_node):
     path.reverse()
     return path
 
+def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
+    n = len(adj_matrix)
+
+    open_list = []
+    heapq.heappush(open_list, (0, start_node))
+    
+    g_costs = {i: float('inf') for i in range(n)}
+    g_costs[start_node] = 0
+    
+    came_from = {start_node: None}
+    
+    f_costs = {i: float('inf') for i in range(n)}
+    f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
+    
+    while open_list:
+        current_node = heapq.heappop(open_list)
+        
+        if current_node == goal_node:
+            return reconstruct_path(came_from, current_node)
+        
+        for neighbor, edge_weight in enumerate(adj_matrix[current_node]):
+            if edge_weight > 0:
+                tentative_g_cost = g_costs[current_node] + edge_weight
+                
+                if tentative_g_cost < g_costs[neighbor]:
+                    came_from[neighbor] = current_node
+                    g_costs[neighbor] = tentative_g_cost
+                    
+                    h_cost = heuristic(neighbor, goal_node, node_attributes)
+                    
+                    f_costs[neighbor] = tentative_g_cost + h_cost
+                    
+                    heapq.heappush(open_list, (f_costs[neighbor], neighbor))
+    
+    return None
 
 
 # Algorithm: Bi-Directional Heuristic Search
