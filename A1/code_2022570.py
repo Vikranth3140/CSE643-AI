@@ -250,7 +250,7 @@ def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
     f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
     
     while open_list:
-        current_node = heapq.heappop(open_list)
+        temp, current_node = heapq.heappop(open_list)
         
         if current_node == goal_node:
             return reconstruct_path(came_from, current_node)
