@@ -220,20 +220,17 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 
 # Heuristic function: Euclidean distance between two nodes based on their coordinates
 def heuristic(node1, node2, node_attributes):
-
-    print(node_attributes)
-    # Ensure node1 and node2 are integers
     node1 = int(node1)
     node2 = int(node2)
     
-    # Extract coordinates and convert them to floats
-    x1, y1 = map(float, node_attributes[node1])
-    x2, y2 = map(float, node_attributes[node2])
+    # Access the 'x' and 'y' coordinates from the node_attributes dictionary
+    x1, y1 = node_attributes[node1]['x'], node_attributes[node1]['y']
+    x2, y2 = node_attributes[node2]['x'], node_attributes[node2]['y']
     
-    # Calculate Euclidean distance
+    # Calculate and return the Euclidean distance
     return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-# A* Search Algorithm
+# Example usage in your A* algorithm
 def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
     n = len(adj_matrix)  # Number of nodes in the graph
 
