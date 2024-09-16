@@ -302,6 +302,9 @@ def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 34, 33, 11, 32, 31, 3, 5, 97, 28, 10, 12]
 
+import heapq
+import math
+
 # Heuristic function: Euclidean distance between two nodes based on their coordinates
 def heuristic(node1, node2, node_attributes):
     node1 = int(node1)
@@ -334,7 +337,22 @@ def reconstruct_bidirectional_path(came_from_forward, came_from_backward, meetin
     # Combine the two parts
     return path_forward + path_backward
 
-# Bi-Directional Heuristic Search implementation
+# Find the meeting point with the least cost
+def find_least_cost_meeting_point(visited_forward, visited_backward, g_costs_forward, g_costs_backward):
+    meeting_point = None
+    min_cost = float('inf')
+
+    for node in visited_forward:
+        if node in visited_backward:
+            # Total cost of reaching the node from both directions
+            total_cost = g_costs_forward[node] + g_costs_backward[node]
+            if total_cost < min_cost:
+                min_cost = total_cost
+                meeting_point = node
+
+    return meeting_point
+
+# Bi-Directional Heuristic Search implementation with least cost meeting point
 def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_node, goal_node):
     n = len(adj_matrix)  # Number of nodes in the graph
 
@@ -365,14 +383,15 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
 
     # Perform the search
     while open_list_forward and open_list_backward:
+        # Find the least cost meeting point
+        meeting_point = find_least_cost_meeting_point(visited_forward, visited_backward, g_costs_forward, g_costs_backward)
+        if meeting_point is not None:
+            return reconstruct_bidirectional_path(came_from_forward, came_from_backward, meeting_point)
+
         # Forward search step
         if open_list_forward:
             _, current_node_forward = heapq.heappop(open_list_forward)
             visited_forward.add(current_node_forward)
-
-            # If the forward search meets the backward search
-            if current_node_forward in visited_backward:
-                return reconstruct_bidirectional_path(came_from_forward, came_from_backward, current_node_forward)
 
             # Expand neighbors in forward direction
             for neighbor, edge_weight in enumerate(adj_matrix[current_node_forward]):
@@ -384,7 +403,6 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
                         g_costs_forward[neighbor] = tentative_g_cost_forward
                         
                         h_cost = heuristic(neighbor, goal_node, node_attributes)
-                        
                         f_cost_forward = tentative_g_cost_forward + h_cost
                         f_costs_forward[neighbor] = f_cost_forward
                         heapq.heappush(open_list_forward, (f_cost_forward, neighbor))
@@ -393,10 +411,6 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
         if open_list_backward:
             _, current_node_backward = heapq.heappop(open_list_backward)
             visited_backward.add(current_node_backward)
-
-            # If the backward search meets the forward search
-            if current_node_backward in visited_forward:
-                return reconstruct_bidirectional_path(came_from_forward, came_from_backward, current_node_backward)
 
             # Expand neighbors in backward direction
             for neighbor, edge_weight in enumerate(adj_matrix[current_node_backward]):
@@ -408,7 +422,6 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
                         g_costs_backward[neighbor] = tentative_g_cost_backward
                         
                         h_cost = heuristic(neighbor, start_node, node_attributes)
-                        
                         f_cost_backward = tentative_g_cost_backward + h_cost
                         f_costs_backward[neighbor] = f_cost_backward
                         heapq.heappush(open_list_backward, (f_cost_backward, neighbor))
@@ -431,10 +444,45 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
 # - The graph is undirected, so if an edge (u, v) is vulnerable, then (v, u) should not be repeated in the output list.
 # - If the input graph has no vulnerable roads, return an empty list [].
 
+def dfs(u, parent, discovery, low, time, visited, adj_matrix, bridges):
+    visited[u] = True
+    discovery[u] = low[u] = time[0]
+    time[0] += 1
+    
+    for v in range(len(adj_matrix)):
+        if adj_matrix[u][v] == 1:  # There's an edge between u and v
+            if not visited[v]:  # If v is not visited
+                dfs(v, u, discovery, low, time, visited, adj_matrix, bridges)
+                
+                # Update low[u] because of the traversal to v
+                low[u] = min(low[u], low[v])
+                
+                # If v cannot reach an ancestor of u, the edge u-v is a bridge
+                if low[v] > discovery[u]:
+                    bridges.append((u, v))
+            elif v != parent:
+                # Update low[u] considering the back edge
+                low[u] = min(low[u], discovery[v])
+
+def find_bridges(adj_matrix):
+    n = len(adj_matrix)
+    visited = [False] * n
+    discovery = [-1] * n  # Discovery time of visited vertices
+    low = [-1] * n  # Earliest visited vertex reachable
+    time = [0]  # Timer
+    bridges = []  # To store the bridges
+    
+    # Run DFS from every unvisited node (to cover disconnected components)
+    for i in range(n):
+        if not visited[i]:
+            dfs(i, -1, discovery, low, time, visited, adj_matrix, bridges)
+    
+    return bridges
+
 def bonus_problem(adj_matrix):
-
-  return []
-
+    # Find the bridges in the graph
+    bridges = find_bridges(adj_matrix)
+    return bridges
 
 if __name__ == "__main__":
   adj_matrix = np.load('IIIT_Delhi.npy')
