@@ -444,44 +444,33 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
 # - The graph is undirected, so if an edge (u, v) is vulnerable, then (v, u) should not be repeated in the output list.
 # - If the input graph has no vulnerable roads, return an empty list [].
 
-def dfs(u, parent, discovery, low, time, visited, adj_matrix, bridges):
-    visited[u] = True
-    discovery[u] = low[u] = time[0]
+def dfs(adj_matrix, node, parent, visited, disc, low, bridges, time):
+    visited[node] = True
+    disc[node] = low[node] = time[0]
     time[0] += 1
     
-    for v in range(len(adj_matrix)):
-        if adj_matrix[u][v] == 1:  # There's an edge between u and v
-            if not visited[v]:  # If v is not visited
-                dfs(v, u, discovery, low, time, visited, adj_matrix, bridges)
-                
-                # Update low[u] because of the traversal to v
-                low[u] = min(low[u], low[v])
-                
-                # If v cannot reach an ancestor of u, the edge u-v is a bridge
-                if low[v] > discovery[u]:
-                    bridges.append((u, v))
-            elif v != parent:
-                # Update low[u] considering the back edge
-                low[u] = min(low[u], discovery[v])
-
-def find_bridges(adj_matrix):
-    n = len(adj_matrix)
-    visited = [False] * n
-    discovery = [-1] * n  # Discovery time of visited vertices
-    low = [-1] * n  # Earliest visited vertex reachable
-    time = [0]  # Timer
-    bridges = []  # To store the bridges
-    
-    # Run DFS from every unvisited node (to cover disconnected components)
-    for i in range(n):
-        if not visited[i]:
-            dfs(i, -1, discovery, low, time, visited, adj_matrix, bridges)
-    
-    return bridges
+    for neighbor, connected in enumerate(adj_matrix[node]):
+        if connected:
+            if not visited[neighbor]:
+                dfs(adj_matrix, neighbor, node, visited, disc, low, bridges, time)
+                low[node] = min(low[node], low[neighbor])
+                if low[neighbor] > disc[node]:
+                    bridges.append((node, neighbor))
+            elif neighbor != parent:
+                low[node] = min(low[node], disc[neighbor])
 
 def bonus_problem(adj_matrix):
-    # Find the bridges in the graph
-    bridges = find_bridges(adj_matrix)
+    n = len(adj_matrix)
+    visited = [False] * n
+    disc = [float('inf')] * n
+    low = [float('inf')] * n
+    bridges = []
+    time = [0]
+
+    for i in range(n):
+        if not visited[i]:
+            dfs(adj_matrix, i, -1, visited, disc, low, bridges, time)
+    
     return bridges
 
 if __name__ == "__main__":
