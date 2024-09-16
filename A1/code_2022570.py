@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from tqdm import tqdm
 import heapq
+import math
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -217,10 +218,61 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 27, 9, 8, 5, 97, 28, 10, 12]
 
+# Heuristic function to calculate the Euclidean distance
+def euclidean_heuristic(node1, node2, node_attributes):
+    x1, y1 = node_attributes[node1]
+    x2, y2 = node_attributes[node2]
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+# A* Search function
 def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
+    # Initialize open list and closed list
+    open_list = []
+    closed_list = set()
+    
+    # The dictionary to store the cost to reach each node (g) and parent nodes
+    g_score = {start_node: 0}
+    parents = {start_node: None}
 
-  return []
+    # Push the start node to the open list with f = g + h (in this case, h = heuristic)
+    heapq.heappush(open_list, (euclidean_heuristic(start_node, goal_node, node_attributes), start_node))
 
+    while open_list:
+        # Get the node with the lowest f value
+        current_f, current_node = heapq.heappop(open_list)
+
+        # If we've reached the goal, reconstruct the path
+        if current_node == goal_node:
+            path = []
+            while current_node is not None:
+                path.append(current_node)
+                current_node = parents[current_node]
+            return path[::-1]  # Reverse the path to get the correct order
+
+        # Add current node to the closed list
+        closed_list.add(current_node)
+
+        # Check all neighbors (successors)
+        for neighbor, is_connected in enumerate(adj_matrix[current_node]):
+            if is_connected == 0 or neighbor in closed_list:
+                continue  # Ignore if not connected or already evaluated
+
+            # Calculate the g score for the neighbor
+            tentative_g_score = g_score[current_node] + adj_matrix[current_node][neighbor]
+
+            # If the neighbor hasn't been discovered yet or we found a shorter path
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                # Update the g score and parent of the neighbor
+                g_score[neighbor] = tentative_g_score
+                parents[neighbor] = current_node
+
+                # Calculate the f score for the neighbor
+                f_score = tentative_g_score + euclidean_heuristic(neighbor, goal_node, node_attributes)
+
+                # Add the neighbor to the open list with the updated f score
+                heapq.heappush(open_list, (f_score, neighbor))
+
+    return None  # If the goal was never reached
 
 # Algorithm: Bi-Directional Heuristic Search
 
