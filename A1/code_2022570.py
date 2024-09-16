@@ -431,7 +431,6 @@ if __name__ == "__main__":
 
 
 
-# Modify the performance test to loop through nodes using i and j, applying it to all search algorithms
 
 def performance_test(adj_matrix, node_attributes):
     num_nodes = len(node_attributes)
@@ -497,5 +496,4 @@ def performance_test(adj_matrix, node_attributes):
     print("Time taken for BHDS:", (end_time - start_time), "seconds")
 
 
-# Running the performance test using i and j indices for all nodes
 performance_test(adj_matrix, node_attributes)
