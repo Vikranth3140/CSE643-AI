@@ -3,6 +3,8 @@ import pickle
 from tqdm import tqdm
 import heapq
 import math
+import tracemalloc
+import time
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -302,9 +304,129 @@ def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 34, 33, 11, 32, 31, 3, 5, 97, 28, 10, 12]
 
-def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_node, goal_node):
 
-  return []
+def heuristic(node1, node2, node_attributes):
+    node1 = int(node1)
+    node2 = int(node2)
+    
+    # Access the 'x' and 'y' coordinates from the node_attributes dictionary
+    x1, y1 = node_attributes[node1]['x'], node_attributes[node1]['y']
+    x2, y2 = node_attributes[node2]['x'], node_attributes[node2]['y']
+    
+    # Calculate and return the Euclidean distance
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+# Reconstruct the path from the meeting point
+def reconstruct_bidirectional_path(came_from_forward, came_from_backward, meeting_point):
+    # Reconstruct path from start to meeting point (forward direction)
+    path_forward = []
+    node = meeting_point
+    while node is not None:
+        path_forward.append(node)
+        node = came_from_forward.get(node, None)
+    path_forward.reverse()  # Reverse the path from start to meeting point
+
+    # Reconstruct path from meeting point to goal (backward direction)
+    path_backward = []
+    node = meeting_point
+    while came_from_backward.get(node, None) is not None:
+        node = came_from_backward[node]
+        path_backward.append(node)
+
+    # Combine the two parts
+    return path_forward + path_backward
+
+# Find the meeting point with the least cost
+def find_least_cost_meeting_point(visited_forward, visited_backward, g_costs_forward, g_costs_backward):
+    meeting_point = None
+    min_cost = float('inf')
+
+    for node in visited_forward:
+        if node in visited_backward:
+            # Total cost of reaching the node from both directions
+            total_cost = g_costs_forward[node] + g_costs_backward[node]
+            if total_cost < min_cost:
+                min_cost = total_cost
+                meeting_point = node
+
+    return meeting_point
+
+# Bi-Directional Heuristic Search implementation with least cost meeting point
+def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_node, goal_node):
+    n = len(adj_matrix)  # Number of nodes in the graph
+
+    # Priority queues for forward and backward search
+    open_list_forward = []
+    open_list_backward = []
+    heapq.heappush(open_list_forward, (0, start_node))  # (f_cost, node)
+    heapq.heappush(open_list_backward, (0, goal_node))  # (f_cost, node)
+
+    # g-costs and f-costs for both directions
+    g_costs_forward = {i: float('inf') for i in range(n)}
+    g_costs_backward = {i: float('inf') for i in range(n)}
+    g_costs_forward[start_node] = 0
+    g_costs_backward[goal_node] = 0
+
+    f_costs_forward = {i: float('inf') for i in range(n)}
+    f_costs_backward = {i: float('inf') for i in range(n)}
+    f_costs_forward[start_node] = heuristic(start_node, goal_node, node_attributes)
+    f_costs_backward[goal_node] = heuristic(goal_node, start_node, node_attributes)
+
+    # Track paths
+    came_from_forward = {start_node: None}
+    came_from_backward = {goal_node: None}
+
+    # Track visited nodes for both searches
+    visited_forward = set()
+    visited_backward = set()
+
+    # Perform the search
+    while open_list_forward and open_list_backward:
+        # Find the least cost meeting point
+        meeting_point = find_least_cost_meeting_point(visited_forward, visited_backward, g_costs_forward, g_costs_backward)
+        if meeting_point is not None:
+            return reconstruct_bidirectional_path(came_from_forward, came_from_backward, meeting_point)
+
+        # Forward search step
+        if open_list_forward:
+            _, current_node_forward = heapq.heappop(open_list_forward)
+            visited_forward.add(current_node_forward)
+
+            # Expand neighbors in forward direction
+            for neighbor, edge_weight in enumerate(adj_matrix[current_node_forward]):
+                if edge_weight > 0:  # Only consider connected neighbors
+                    tentative_g_cost_forward = g_costs_forward[current_node_forward] + edge_weight
+
+                    if tentative_g_cost_forward < g_costs_forward[neighbor]:
+                        came_from_forward[neighbor] = current_node_forward
+                        g_costs_forward[neighbor] = tentative_g_cost_forward
+                        
+                        h_cost = heuristic(neighbor, goal_node, node_attributes)
+                        f_cost_forward = tentative_g_cost_forward + h_cost
+                        f_costs_forward[neighbor] = f_cost_forward
+                        heapq.heappush(open_list_forward, (f_cost_forward, neighbor))
+
+        # Backward search step
+        if open_list_backward:
+            _, current_node_backward = heapq.heappop(open_list_backward)
+            visited_backward.add(current_node_backward)
+
+            # Expand neighbors in backward direction
+            for neighbor, edge_weight in enumerate(adj_matrix[current_node_backward]):
+                if edge_weight > 0:  # Only consider connected neighbors
+                    tentative_g_cost_backward = g_costs_backward[current_node_backward] + edge_weight
+
+                    if tentative_g_cost_backward < g_costs_backward[neighbor]:
+                        came_from_backward[neighbor] = current_node_backward
+                        g_costs_backward[neighbor] = tentative_g_cost_backward
+                        
+                        h_cost = heuristic(neighbor, start_node, node_attributes)
+                        f_cost_backward = tentative_g_cost_backward + h_cost
+                        f_costs_backward[neighbor] = f_cost_backward
+                        heapq.heappush(open_list_backward, (f_cost_backward, neighbor))
+
+    # If no meeting point is found, return None
+    return None
 
 
 
@@ -321,10 +443,34 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
 # - The graph is undirected, so if an edge (u, v) is vulnerable, then (v, u) should not be repeated in the output list.
 # - If the input graph has no vulnerable roads, return an empty list [].
 
+def dfs(adj_matrix, node, parent, visited, disc, low, bridges, time):
+    visited[node] = True
+    disc[node] = low[node] = time[0]
+    time[0] += 1
+
+    for neighbor, connected in enumerate(adj_matrix[node]):
+        if connected:
+            if not visited[neighbor]:
+                dfs(adj_matrix, neighbor, node, visited, disc, low, bridges, time)
+                low[node] = min(low[node], low[neighbor])
+                if low[neighbor] > disc[node]:
+                    bridges.append((node, neighbor))
+            elif neighbor != parent:
+                low[node] = min(low[node], disc[neighbor])
+
 def bonus_problem(adj_matrix):
+    n = len(adj_matrix)
+    visited = [False] * n
+    disc = [float('inf')] * n
+    low = [float('inf')] * n
+    bridges = []
+    time = [0]
 
-  return []
-
+    for i in range(n):
+        if not visited[i]:
+            dfs(adj_matrix, i, -1, visited, disc, low, bridges, time)
+    
+    return bridges
 
 if __name__ == "__main__":
   adj_matrix = np.load('IIIT_Delhi.npy')
@@ -339,3 +485,64 @@ if __name__ == "__main__":
   print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
   print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
   print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
+
+
+
+
+# C
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_ids_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_ids = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for IDS (current, peak):", memory_used_ids)
+print("Time taken for IDS:", (end_time - start_time), "seconds")
+
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_bidirectional_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_bds = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for BDS (current, peak):", memory_used_bds)
+print("Time taken for BDS:", (end_time - start_time), "seconds")
+
+# E
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_astar_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_a_star = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for A* (current, peak):", memory_used_a_star)
+print("Time taken for A*:", (end_time - start_time), "seconds")
+
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_bidirectional_heuristic_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_bhds = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for BHDS (current, peak):", memory_used_bhds)
+print("Time taken for BHDS:", (end_time - start_time), "seconds")
