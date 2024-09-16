@@ -218,67 +218,67 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 27, 9, 8, 5, 97, 28, 10, 12]
 
-# Calculate Euclidean distance as heuristic
-def calculate_h_value(node, goal_node, node_attributes):
-    x1, y1 = node_attributes[node]
-    x2, y2 = node_attributes[goal_node]
-    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+# Heuristic function: Euclidean distance between two nodes based on their coordinates
+def heuristic(node1, node2, node_attributes):
+    node1 = int(node1)
+    node2 = int(node2)
+    
+    # Access the 'x' and 'y' coordinates from the node_attributes dictionary
+    x1, y1 = node_attributes[node1]['x'], node_attributes[node1]['y']
+    x2, y2 = node_attributes[node2]['x'], node_attributes[node2]['y']
+    
+    # Calculate and return the Euclidean distance
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-# Function to trace the path back from the goal node to the start node
-def trace_path(cell_details, goal_node):
-    path = []
-    current_node = goal_node
-    while cell_details[current_node]['parent'] is not None:
-        path.append(current_node)
-        current_node = cell_details[current_node]['parent']
-    path.append(current_node)  # Add the start node
-    path.reverse()  # Reverse the path to get from start to goal
-    return path
-
-# A* search algorithm implementation
+# Example usage in your A* algorithm
 def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
-    if start_node == goal_node:
-        return [start_node]
+    n = len(adj_matrix)  # Number of nodes in the graph
 
-    num_nodes = len(adj_matrix)
+    # Priority queue for A* search
     open_list = []
-    closed_list = set()
-    cell_details = {i: {'f': float('inf'), 'g': float('inf'), 'h': float('inf'), 'parent': None} for i in range(num_nodes)}
-
-    # Initialize start node
-    cell_details[start_node]['f'] = 0.0
-    cell_details[start_node]['g'] = 0.0
-    cell_details[start_node]['h'] = 0.0
-    heapq.heappush(open_list, (0.0, start_node))
-
+    heapq.heappush(open_list, (0, start_node))  # (f_cost, node)
+    
+    # To store the best known cost to reach each node
+    g_costs = {i: float('inf') for i in range(n)}
+    g_costs[start_node] = 0
+    
+    # To track the path
+    came_from = {start_node: None}
+    
+    # To store f-cost for each node
+    f_costs = {i: float('inf') for i in range(n)}
+    f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
+    
     while open_list:
-        _, current_node = heapq.heappop(open_list)
-        if current_node in closed_list:
-            continue
-
-        # If goal is reached, trace and return the path
+        # Get the node with the lowest f_cost
+        current_f, current_node = heapq.heappop(open_list)
+        
+        # If the goal is reached, reconstruct and return the path
         if current_node == goal_node:
-            return trace_path(cell_details, goal_node)
-
-        closed_list.add(current_node)
-
+            return reconstruct_path(came_from, current_node)
+        
         # Explore neighbors
-        for neighbor in range(num_nodes):
-            if adj_matrix[current_node][neighbor] > 0 and neighbor not in closed_list:  # Valid neighbor
-                g_new = cell_details[current_node]['g'] + adj_matrix[current_node][neighbor]
-                h_new = calculate_h_value(neighbor, goal_node, node_attributes)
-                f_new = g_new + h_new
+        for neighbor, is_connected in enumerate(adj_matrix[current_node]):
+            if is_connected:  # Only consider connected neighbors
+                tentative_g_cost = g_costs[current_node] + 1  # Assuming uniform cost
+                
+                # If we find a better path, update it
+                if tentative_g_cost < g_costs[neighbor]:
+                    came_from[neighbor] = current_node
+                    g_costs[neighbor] = tentative_g_cost
+                    f_costs[neighbor] = tentative_g_cost + heuristic(neighbor, goal_node, node_attributes)
+                    heapq.heappush(open_list, (f_costs[neighbor], neighbor))
+    
+    return None  # Return None if no path is found
 
-                # If a better path is found
-                if f_new < cell_details[neighbor]['f']:
-                    cell_details[neighbor]['f'] = f_new
-                    cell_details[neighbor]['g'] = g_new
-                    cell_details[neighbor]['h'] = h_new
-                    cell_details[neighbor]['parent'] = current_node
-                    heapq.heappush(open_list, (f_new, neighbor))
-
-    # If the goal node is not reached, return None
-    return None
+# Function to reconstruct the path from start to goal
+def reconstruct_path(came_from, current_node):
+    path = []
+    while current_node is not None:
+        path.append(current_node)
+        current_node = came_from[current_node]
+    path.reverse()
+    return path
 
 
 
