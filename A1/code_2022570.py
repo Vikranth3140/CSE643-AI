@@ -517,3 +517,32 @@ tracemalloc.stop()
 
 print("Memory used for BDS (current, peak):", memory_used_bds)
 print("Time taken for BDS:", (end_time - start_time), "seconds")
+
+# E
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_astar_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_a_star = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for A* (current, peak):", memory_used_a_star)
+print("Time taken for A*:", (end_time - start_time), "seconds")
+
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_bidirectional_heuristic_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_bhds = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for BHDS (current, peak):", memory_used_bhds)
+print("Time taken for BHDS:", (end_time - start_time), "seconds")
