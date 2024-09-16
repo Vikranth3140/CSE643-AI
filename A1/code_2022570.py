@@ -382,7 +382,10 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
                     if tentative_g_cost_forward < g_costs_forward[neighbor]:
                         came_from_forward[neighbor] = current_node_forward
                         g_costs_forward[neighbor] = tentative_g_cost_forward
-                        f_cost_forward = tentative_g_cost_forward + heuristic(neighbor, goal_node, node_attributes)
+                        
+                        h_cost = heuristic(neighbor, goal_node, node_attributes)
+                        
+                        f_cost_forward = tentative_g_cost_forward + h_cost
                         f_costs_forward[neighbor] = f_cost_forward
                         heapq.heappush(open_list_forward, (f_cost_forward, neighbor))
 
@@ -403,7 +406,10 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
                     if tentative_g_cost_backward < g_costs_backward[neighbor]:
                         came_from_backward[neighbor] = current_node_backward
                         g_costs_backward[neighbor] = tentative_g_cost_backward
-                        f_cost_backward = tentative_g_cost_backward + heuristic(neighbor, start_node, node_attributes)
+                        
+                        h_cost = heuristic(neighbor, start_node, node_attributes)
+                        
+                        f_cost_backward = tentative_g_cost_backward + h_cost
                         f_costs_backward[neighbor] = f_cost_backward
                         heapq.heappush(open_list_backward, (f_cost_backward, neighbor))
 
