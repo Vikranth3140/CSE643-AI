@@ -3,6 +3,8 @@ import pickle
 from tqdm import tqdm
 import heapq
 import math
+import tracemalloc
+import time
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -302,10 +304,7 @@ def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 34, 33, 11, 32, 31, 3, 5, 97, 28, 10, 12]
 
-import heapq
-import math
 
-# Heuristic function: Euclidean distance between two nodes based on their coordinates
 def heuristic(node1, node2, node_attributes):
     node1 = int(node1)
     node2 = int(node2)
@@ -448,7 +447,7 @@ def dfs(adj_matrix, node, parent, visited, disc, low, bridges, time):
     visited[node] = True
     disc[node] = low[node] = time[0]
     time[0] += 1
-    
+
     for neighbor, connected in enumerate(adj_matrix[node]):
         if connected:
             if not visited[neighbor]:
@@ -486,3 +485,35 @@ if __name__ == "__main__":
   print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
   print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
   print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
+
+
+
+
+# C
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_ids_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_ids = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for IDS (current, peak):", memory_used_ids)
+print("Time taken for IDS:", (end_time - start_time), "seconds")
+
+tracemalloc.start()
+start_time = time.time()
+
+for start_node in range(len(node_attributes)):
+    for end_node in range(start_node + 1, len(node_attributes)):
+        get_bidirectional_search_path(adj_matrix, start_node, end_node)
+
+end_time = time.time()
+memory_used_bds = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+
+print("Memory used for BDS (current, peak):", memory_used_bds)
+print("Time taken for BDS:", (end_time - start_time), "seconds")
