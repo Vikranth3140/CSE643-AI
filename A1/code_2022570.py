@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from tqdm import tqdm
 import heapq
+import math
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -217,9 +218,58 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 27, 9, 8, 5, 97, 28, 10, 12]
 
-def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
+def heuristic(node1, node2, node_attributes):
+    node1 = int(node1)
+    node2 = int(node2)
+    
+    x1, y1 = node_attributes[node1]['x'], node_attributes[node1]['y']
+    x2, y2 = node_attributes[node2]['x'], node_attributes[node2]['y']
+    
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-  return []
+def reconstruct_path(came_from, current_node):
+    path = []
+    while current_node is not None:
+        path.append(current_node)
+        current_node = came_from[current_node]
+    path.reverse()
+    return path
+
+def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
+    n = len(adj_matrix)
+
+    open_list = []
+    heapq.heappush(open_list, (0, start_node))
+    
+    g_costs = {i: float('inf') for i in range(n)}
+    g_costs[start_node] = 0
+    
+    came_from = {start_node: None}
+    
+    f_costs = {i: float('inf') for i in range(n)}
+    f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
+    
+    while open_list:
+        temp, current_node = heapq.heappop(open_list)
+        
+        if current_node == goal_node:
+            return reconstruct_path(came_from, current_node)
+        
+        for neighbor, edge_weight in enumerate(adj_matrix[current_node]):
+            if edge_weight > 0:
+                tentative_g_cost = g_costs[current_node] + edge_weight
+                
+                if tentative_g_cost < g_costs[neighbor]:
+                    came_from[neighbor] = current_node
+                    g_costs[neighbor] = tentative_g_cost
+                    
+                    h_cost = heuristic(neighbor, goal_node, node_attributes)
+                    
+                    f_costs[neighbor] = tentative_g_cost + h_cost
+                    
+                    heapq.heappush(open_list, (f_costs[neighbor], neighbor))
+    
+    return None
 
 
 # Algorithm: Bi-Directional Heuristic Search
