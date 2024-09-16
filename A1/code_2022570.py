@@ -218,61 +218,72 @@ def get_bidirectional_search_path(adj_matrix, start_node, goal_node):
 #     - Start node: 4, Goal node: 12
 #     - Return: [4, 6, 27, 9, 8, 5, 97, 28, 10, 12]
 
-# Heuristic function to calculate the Euclidean distance
-def euclidean_heuristic(node1, node2, node_attributes):
-    x1, y1 = node_attributes[node1]
-    x2, y2 = node_attributes[node2]
+# Heuristic function: Euclidean distance between two nodes based on their coordinates
+def heuristic(node1, node2, node_attributes):
+
+    print(node_attributes)
+    # Ensure node1 and node2 are integers
+    node1 = int(node1)
+    node2 = int(node2)
+    
+    # Extract coordinates and convert them to floats
+    x1, y1 = map(float, node_attributes[node1])
+    x2, y2 = map(float, node_attributes[node2])
+    
+    # Calculate Euclidean distance
     return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
-# A* Search function
+# A* Search Algorithm
 def get_astar_search_path(adj_matrix, node_attributes, start_node, goal_node):
-    # Initialize open list and closed list
+    n = len(adj_matrix)  # Number of nodes in the graph
+
+    # Priority queue for A* search
     open_list = []
-    closed_list = set()
+    heapq.heappush(open_list, (0, start_node))  # (f_cost, node)
     
-    # The dictionary to store the cost to reach each node (g) and parent nodes
-    g_score = {start_node: 0}
-    parents = {start_node: None}
-
-    # Push the start node to the open list with f = g + h (in this case, h = heuristic)
-    heapq.heappush(open_list, (euclidean_heuristic(start_node, goal_node, node_attributes), start_node))
-
+    # To store the best known cost to reach each node
+    g_costs = {i: float('inf') for i in range(n)}
+    g_costs[start_node] = 0
+    
+    # To track the path
+    came_from = {start_node: None}
+    
+    # To store f-cost for each node
+    f_costs = {i: float('inf') for i in range(n)}
+    f_costs[start_node] = heuristic(start_node, goal_node, node_attributes)
+    
     while open_list:
-        # Get the node with the lowest f value
+        # Get the node with the lowest f_cost
         current_f, current_node = heapq.heappop(open_list)
-
-        # If we've reached the goal, reconstruct the path
+        
+        # If the goal is reached, reconstruct and return the path
         if current_node == goal_node:
-            path = []
-            while current_node is not None:
-                path.append(current_node)
-                current_node = parents[current_node]
-            return path[::-1]  # Reverse the path to get the correct order
-
-        # Add current node to the closed list
-        closed_list.add(current_node)
-
-        # Check all neighbors (successors)
+            return reconstruct_path(came_from, current_node)
+        
+        # Explore neighbors
         for neighbor, is_connected in enumerate(adj_matrix[current_node]):
-            if is_connected == 0 or neighbor in closed_list:
-                continue  # Ignore if not connected or already evaluated
+            if is_connected:  # Only consider connected neighbors
+                tentative_g_cost = g_costs[current_node] + 1  # Assuming uniform cost
+                
+                # If we find a better path, update it
+                if tentative_g_cost < g_costs[neighbor]:
+                    came_from[neighbor] = current_node
+                    g_costs[neighbor] = tentative_g_cost
+                    f_costs[neighbor] = tentative_g_cost + heuristic(neighbor, goal_node, node_attributes)
+                    heapq.heappush(open_list, (f_costs[neighbor], neighbor))
+    
+    return None  # Return None if no path is found
 
-            # Calculate the g score for the neighbor
-            tentative_g_score = g_score[current_node] + adj_matrix[current_node][neighbor]
+# Function to reconstruct the path from start to goal
+def reconstruct_path(came_from, current_node):
+    path = []
+    while current_node is not None:
+        path.append(current_node)
+        current_node = came_from[current_node]
+    path.reverse()
+    return path
 
-            # If the neighbor hasn't been discovered yet or we found a shorter path
-            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                # Update the g score and parent of the neighbor
-                g_score[neighbor] = tentative_g_score
-                parents[neighbor] = current_node
 
-                # Calculate the f score for the neighbor
-                f_score = tentative_g_score + euclidean_heuristic(neighbor, goal_node, node_attributes)
-
-                # Add the neighbor to the open list with the updated f score
-                heapq.heappush(open_list, (f_score, neighbor))
-
-    return None  # If the goal was never reached
 
 # Algorithm: Bi-Directional Heuristic Search
 
