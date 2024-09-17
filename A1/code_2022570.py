@@ -3,7 +3,7 @@ import pickle
 from tqdm import tqdm
 import heapq
 import math
-import tracemalloc
+import psutil
 import time
 
 # General Notes:
@@ -311,21 +311,19 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
     
     def a_star_step(frontier, cost_so_far, other_cost, came_from, direction):
         current_f, current = heapq.heappop(frontier)
-        if current in other_cost:  # If the two searches meet
+        if current in other_cost:
             return current
         
         for neighbor, cost in enumerate(adj_matrix[current]):
-            if cost > 0:  # There's a connection
+            if cost > 0:
                 new_cost = cost_so_far[current] + cost
                 if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
                     cost_so_far[neighbor] = new_cost
-                    # Only pass the two nodes and node_attributes to the heuristic function
                     priority = new_cost + heuristic(neighbor, goal_node, node_attributes)
                     heapq.heappush(frontier, (priority, neighbor))
                     came_from[neighbor] = current
         return None
 
-    # Initialize two priority queues (forward and backward)
     frontier_fwd = [(0, start_node)]
     frontier_bwd = [(0, goal_node)]
     
@@ -338,20 +336,17 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
     meeting_node = None
 
     while frontier_fwd and frontier_bwd:
-        # Step in the forward search
         meeting_node = a_star_step(frontier_fwd, cost_fwd, cost_bwd, came_from_fwd, "forward")
         if meeting_node:
             break
         
-        # Step in the backward search
         meeting_node = a_star_step(frontier_bwd, cost_bwd, cost_fwd, came_from_bwd, "backward")
         if meeting_node:
             break
     
     if meeting_node is None:
-        return None  # No path found
+        return None
     
-    # Reconstruct the path
     def reconstruct_path(meeting_node):
         path_fwd = []
         current = meeting_node
@@ -432,68 +427,70 @@ if __name__ == "__main__":
 
 
 
+def get_memory_usage():
+    process = psutil.Process()
+    memory_info = process.memory_info()
+    return memory_info.rss
+
+
 def performance_test(adj_matrix, node_attributes):
     num_nodes = len(node_attributes)
 
     # # IDS Performance Test
-    # tracemalloc.start()
-    # start_time = time.time()
+    # start_memory_ids = get_memory_usage()
+    # start_time_ids = time.time()
 
     # for i in range(num_nodes):
     #     for j in range(i + 1, num_nodes):
     #         get_ids_path(adj_matrix, i, j)
 
-    # end_time = time.time()
-    # memory_used_ids = tracemalloc.get_traced_memory()
-    # tracemalloc.stop()
+    # end_time_ids = time.time()
+    # end_memory_ids = get_memory_usage()
 
-    # print("Memory used for IDS (current, peak):", memory_used_ids)
-    # print("Time taken for IDS:", (end_time - start_time), "seconds")
+    # print("Memory used for IDS:", (end_memory_ids - start_memory_ids) / (1024 ** 2), "MB")
+    # print("Time taken for IDS:", (end_time_ids - start_time_ids), "seconds")
 
     # BDS Performance Test
-    tracemalloc.start()
-    start_time = time.time()
+    start_memory_bds = get_memory_usage()
+    start_time_bds = time.time()
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
             get_bidirectional_search_path(adj_matrix, i, j)
 
-    end_time = time.time()
-    memory_used_bds = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    end_time_bds = time.time()
+    end_memory_bds = get_memory_usage()
 
-    print("Memory used for BDS (current, peak):", memory_used_bds)
-    print("Time taken for BDS:", (end_time - start_time), "seconds")
+    print("Memory used for BDS:", (end_memory_bds - start_memory_bds) / (1024 ** 2), "MB")
+    print("Time taken for BDS:", (end_time_bds - start_time_bds), "seconds")
 
     # A* Performance Test
-    tracemalloc.start()
-    start_time = time.time()
+    start_memory_astar = get_memory_usage()
+    start_time_astar = time.time()
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
             get_astar_search_path(adj_matrix, node_attributes, i, j)
 
-    end_time = time.time()
-    memory_used_a_star = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    end_time_astar = time.time()
+    end_memory_astar = get_memory_usage()
 
-    print("Memory used for A* (current, peak):", memory_used_a_star)
-    print("Time taken for A*:", (end_time - start_time), "seconds")
+    print("Memory used for A*:", (end_memory_astar - start_memory_astar) / (1024 ** 2), "MB")
+    print("Time taken for A*:", (end_time_astar - start_time_astar), "seconds")
 
     # BHDS Performance Test
-    tracemalloc.start()
-    start_time = time.time()
+    start_memory_bhds = get_memory_usage()
+    start_time_bhds = time.time()
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
             get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, i, j)
 
-    end_time = time.time()
-    memory_used_bhds = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
+    end_time_bhds = time.time()
+    end_memory_bhds = get_memory_usage()
 
-    print("Memory used for BHDS (current, peak):", memory_used_bhds)
-    print("Time taken for BHDS:", (end_time - start_time), "seconds")
+    print("Memory used for BHDS:", (end_memory_bhds - start_memory_bhds) / (1024 ** 2), "MB")
+    print("Time taken for BHDS:", (end_time_bhds - start_time_bhds), "seconds")
 
 
 performance_test(adj_matrix, node_attributes)
