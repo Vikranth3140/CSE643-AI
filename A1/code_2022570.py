@@ -420,14 +420,14 @@ if __name__ == "__main__":
   with open('IIIT_Delhi.pkl', 'rb') as f:
     node_attributes = pickle.load(f)
 
-#   start_node = int(input("Enter the start node: "))
-#   end_node = int(input("Enter the end node: "))
+  start_node = int(input("Enter the start node: "))
+  end_node = int(input("Enter the end node: "))
 
-#   print(f'Iterative Deepening Search Path: {get_ids_path(adj_matrix,start_node,end_node)}')
-#   print(f'Bidirectional Search Path: {get_bidirectional_search_path(adj_matrix,start_node,end_node)}')
-#   print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
-#   print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
-#   print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
+  print(f'Iterative Deepening Search Path: {get_ids_path(adj_matrix,start_node,end_node)}')
+  print(f'Bidirectional Search Path: {get_bidirectional_search_path(adj_matrix,start_node,end_node)}')
+  print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
+  print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
+  print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
 
 
 
