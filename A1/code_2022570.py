@@ -6,6 +6,7 @@ import math
 import psutil
 import time
 import matplotlib.pyplot as plt
+import os
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -47,6 +48,7 @@ import matplotlib.pyplot as plt
 def is_reachable_bfs(adj_matrix, start_node, goal_node):
     visited = set()
     queue = [start_node]
+
     while queue:
         node = queue.pop(0)
         if node == goal_node:
@@ -56,6 +58,7 @@ def is_reachable_bfs(adj_matrix, start_node, goal_node):
         for neighbor in range(len(adj_matrix[node])):
             if adj_matrix[node][neighbor] > 0 and neighbor not in visited:
                 queue.append(neighbor)
+    
     return False
 
 
@@ -93,6 +96,7 @@ def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
         path = depth_limited_search(adj_matrix, start_node, goal_node, depth, visited)
         if path:
             return path
+        
     return None
 
 
@@ -416,16 +420,14 @@ if __name__ == "__main__":
   with open('IIIT_Delhi.pkl', 'rb') as f:
     node_attributes = pickle.load(f)
 
-  start_node = int(input("Enter the start node: "))
-  end_node = int(input("Enter the end node: "))
+#   start_node = int(input("Enter the start node: "))
+#   end_node = int(input("Enter the end node: "))
 
 #   print(f'Iterative Deepening Search Path: {get_ids_path(adj_matrix,start_node,end_node)}')
-  print(f'Bidirectional Search Path: {get_bidirectional_search_path(adj_matrix,start_node,end_node)}')
-  print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
-  print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
-  print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
-
-
+#   print(f'Bidirectional Search Path: {get_bidirectional_search_path(adj_matrix,start_node,end_node)}')
+#   print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
+#   print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
+#   print(f'Bonus Problem: {bonus_problem(adj_matrix)}')
 
 
 
@@ -433,7 +435,6 @@ def get_memory_usage():
     process = psutil.Process()
     memory_info = process.memory_info()
     return memory_info.rss // 1024
-
 
 def performance_test(adj_matrix, node_attributes):
     num_nodes = len(node_attributes)
@@ -443,21 +444,20 @@ def performance_test(adj_matrix, node_attributes):
     astar_paths = []
     bhds_paths = []
 
-    # # IDS Performance Test
-    # start_memory_ids = get_memory_usage()
-    # start_time_ids = time.time()
+    # IDS Performance Test
+    start_memory_ids = get_memory_usage()
+    start_time_ids = time.time()
 
-    # for i in range(num_nodes):
-    #     for j in range(i + 1, num_nodes):
-    #         # Run IDS only if a path exists
-    #         path = get_ids_path(adj_matrix, i, j)
-    #         ids_paths.append((i, j, path))
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            path = get_ids_path(adj_matrix, i, j)
+            ids_paths.append((i, j, path))
 
-    # end_time_ids = time.time()
-    # end_memory_ids = get_memory_usage()
+    end_time_ids = time.time()
+    end_memory_ids = get_memory_usage()
 
-    # print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
-    # print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
+    print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
+    print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
 
     # BDS Performance Test
     start_memory_bds = get_memory_usage()
@@ -470,7 +470,7 @@ def performance_test(adj_matrix, node_attributes):
 
     end_time_bds = time.time()
     end_memory_bds = get_memory_usage()
-
+    
     print(f"Memory used for BDS: {end_memory_bds - start_memory_bds} KB")
     print(f"Time taken for BDS: {end_time_bds - start_time_bds} seconds")
 
@@ -504,13 +504,12 @@ def performance_test(adj_matrix, node_attributes):
     print(f"Memory used for BHDS: {end_memory_bhds - start_memory_bhds} KB")
     print(f"Time taken for BHDS: {end_time_bhds - start_time_bhds} seconds")
 
-    # Return the paths and performance data
     return {
-        # 'IDS': {
-        #     'paths': ids_paths,
-        #     'memory_used': end_memory_ids - start_memory_ids,
-        #     'time_taken': end_time_ids - start_time_ids
-        # },
+        'IDS': {
+            'paths': ids_paths,
+            'memory_used': end_memory_ids - start_memory_ids,
+            'time_taken': end_time_ids - start_time_ids
+        },
         'BDS': {
             'paths': bds_paths,
             'memory_used': end_memory_bds - start_memory_bds,
@@ -530,6 +529,17 @@ def performance_test(adj_matrix, node_attributes):
 
 
 results = performance_test(adj_matrix, node_attributes)
+
+with open('paths.txt', 'w') as f:
+    for algorithm, data in results.items():
+        f.write(f"\n--- {algorithm} Paths ---\n")
+        for path_info in data['paths']:
+            start, goal, path = path_info
+            if path:
+                path_str = ' -> '.join(map(str, path))
+                f.write(f"Path from {start} to {goal}: {path_str}\n")
+            else:
+                f.write(f"Path from {start} to {goal}: No path found\n")
 
 for algorithm, data in results.items():
     print(f"\n--- {algorithm} Performance ---")
@@ -570,6 +580,8 @@ for alg in algorithms:
     total_cost = calculate_total_cost(paths, adj_matrix)
     total_costs.append(total_cost)
 
+os.makedirs('Plots', exist_ok=True)
+
 plt.figure(figsize=(8, 6))
 plt.scatter(memory_usage, time_taken, s=100)
 for i, alg in enumerate(algorithms):
@@ -578,7 +590,9 @@ plt.title('Time vs. Memory Usage for Search Algorithms')
 plt.xlabel('Memory Used (KB)')
 plt.ylabel('Time Taken (seconds)')
 plt.grid(True)
-plt.show()
+plt.tight_layout()
+plt.savefig('Plots/Time_vs_Memory.png')
+plt.close()
 
 plt.figure(figsize=(8, 6))
 plt.scatter(total_costs, time_taken, s=100)
@@ -588,4 +602,6 @@ plt.title('Total Cost (Optimality) vs. Time for Search Algorithms')
 plt.xlabel('Total Cost of Paths')
 plt.ylabel('Time Taken (seconds)')
 plt.grid(True)
-plt.show()
+plt.tight_layout()
+plt.savefig('Plots/Total_Cost_vs_Time.png')
+plt.close()
