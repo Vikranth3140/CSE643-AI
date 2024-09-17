@@ -1,5 +1,5 @@
 --- IDS Performance ---
-Memory used: -39008 KB
+Memory used: 39008 KB
 Time taken: 11240.016671657562 seconds
 
 --- BDS Performance ---
