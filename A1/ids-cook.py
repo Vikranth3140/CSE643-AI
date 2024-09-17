@@ -552,6 +552,11 @@ for algorithm, data in results.items():
     print(f"Memory used: {data['memory_used']} KB")
     print(f"Time taken: {data['time_taken']} seconds")
 
+with open('performance.txt', 'w') as f:
+    for algorithm, data in results.items():
+        f.write(f"\n--- {algorithm} Performance ---\n")
+        f.write(f"Memory used: {data['memory_used']} KB\n")
+        f.write(f"Time taken: {data['time_taken']} seconds\n")
 
 
 

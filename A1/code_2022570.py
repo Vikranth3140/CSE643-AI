@@ -336,7 +336,7 @@ def get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, start_n
     cost_bwd = {goal_node: 0}
     
     meeting_node = None
-
+    
     while frontier_fwd and frontier_bwd:
         meeting_node = a_star_step(frontier_fwd, cost_fwd, cost_bwd, came_from_fwd, "forward")
         if meeting_node:
@@ -542,6 +542,11 @@ for algorithm, data in results.items():
     print(f"Memory used: {data['memory_used']} KB")
     print(f"Time taken: {data['time_taken']} seconds")
 
+with open('performance.txt', 'w') as f:
+    for algorithm, data in results.items():
+        f.write(f"\n--- {algorithm} Performance ---\n")
+        f.write(f"Memory used: {data['memory_used']} KB\n")
+        f.write(f"Time taken: {data['time_taken']} seconds\n")
 
 
 
