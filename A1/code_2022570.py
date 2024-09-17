@@ -419,7 +419,7 @@ if __name__ == "__main__":
   start_node = int(input("Enter the start node: "))
   end_node = int(input("Enter the end node: "))
 
-  print(f'Iterative Deepening Search Path: {get_ids_path(adj_matrix,start_node,end_node)}')
+#   print(f'Iterative Deepening Search Path: {get_ids_path(adj_matrix,start_node,end_node)}')
   print(f'Bidirectional Search Path: {get_bidirectional_search_path(adj_matrix,start_node,end_node)}')
   print(f'A* Path: {get_astar_search_path(adj_matrix,node_attributes,start_node,end_node)}')
   print(f'Bidirectional Heuristic Search Path: {get_bidirectional_heuristic_search_path(adj_matrix,node_attributes,start_node,end_node)}')
@@ -443,21 +443,21 @@ def performance_test(adj_matrix, node_attributes):
     astar_paths = []
     bhds_paths = []
 
-    # IDS Performance Test
-    start_memory_ids = get_memory_usage()
-    start_time_ids = time.time()
+    # # IDS Performance Test
+    # start_memory_ids = get_memory_usage()
+    # start_time_ids = time.time()
 
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            # Run IDS only if a path exists
-            path = get_ids_path(adj_matrix, i, j)
-            ids_paths.append((i, j, path))
+    # for i in range(num_nodes):
+    #     for j in range(i + 1, num_nodes):
+    #         # Run IDS only if a path exists
+    #         path = get_ids_path(adj_matrix, i, j)
+    #         ids_paths.append((i, j, path))
 
-    end_time_ids = time.time()
-    end_memory_ids = get_memory_usage()
+    # end_time_ids = time.time()
+    # end_memory_ids = get_memory_usage()
 
-    print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
-    print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
+    # print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
+    # print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
 
     # BDS Performance Test
     start_memory_bds = get_memory_usage()
@@ -506,11 +506,11 @@ def performance_test(adj_matrix, node_attributes):
 
     # Return the paths and performance data
     return {
-        'IDS': {
-            'paths': ids_paths,
-            'memory_used': end_memory_ids - start_memory_ids,
-            'time_taken': end_time_ids - start_time_ids
-        },
+        # 'IDS': {
+        #     'paths': ids_paths,
+        #     'memory_used': end_memory_ids - start_memory_ids,
+        #     'time_taken': end_time_ids - start_time_ids
+        # },
         'BDS': {
             'paths': bds_paths,
             'memory_used': end_memory_bds - start_memory_bds,
@@ -532,12 +532,6 @@ def performance_test(adj_matrix, node_attributes):
 results = performance_test(adj_matrix, node_attributes)
 
 for algorithm, data in results.items():
-    print(f"\n--- {algorithm} Paths ---")
-    for path_info in data['paths']:
-        start, goal, path = path_info
-        print(f"Path from {start} to {goal}: {path if path else 'No path found'}")
-
-for algorithm, data in results.items():
     print(f"\n--- {algorithm} Performance ---")
     print(f"Memory used: {data['memory_used']} KB")
     print(f"Time taken: {data['time_taken']} seconds")
@@ -548,32 +542,50 @@ with open('performance.txt', 'w') as f:
         f.write(f"Memory used: {data['memory_used']} KB\n")
         f.write(f"Time taken: {data['time_taken']} seconds\n")
 
+algorithms = list(results.keys())
+memory_usage = [results[alg]['memory_used'] for alg in algorithms]
+time_taken = [results[alg]['time_taken'] for alg in algorithms]
 
+def calculate_total_path_length(paths):
+    total_length = 0
+    for _, _, path in paths:
+        if path:
+            total_length += len(path) - 1
+    return total_length
 
-# # Extracting data for plotting
-# algorithms = list(results_data.keys())
-# memory_usage = [results_data[alg]['memory_used'] for alg in algorithms]
-# time_taken = [results_data[alg]['time_taken'] for alg in algorithms]
-# path_lengths = [results_data[alg]['path_length'] for alg in algorithms]
+def calculate_total_cost(paths, adj_matrix):
+    total_cost = 0
+    for _, _, path in paths:
+        if path:
+            for i in range(len(path) - 1):
+                total_cost += adj_matrix[path[i]][path[i+1]]
+    return total_cost
 
-# # Scatter Plot 1: Efficiency in terms of Time and Memory Usage
-# plt.figure(figsize=(8, 6))
-# plt.scatter(memory_usage, time_taken, c=['r', 'g', 'b'], s=100, label=algorithms)
-# for i, alg in enumerate(algorithms):
-#     plt.text(memory_usage[i], time_taken[i], alg, fontsize=12, ha='right')
-# plt.title('Time vs. Memory Usage for Search Algorithms')
-# plt.xlabel('Memory Used (KB)')
-# plt.ylabel('Time Taken (seconds)')
-# plt.grid(True)
-# plt.show()
+path_lengths = []
+total_costs = []
+for alg in algorithms:
+    paths = results[alg]['paths']
+    path_length = calculate_total_path_length(paths)
+    path_lengths.append(path_length)
+    total_cost = calculate_total_cost(paths, adj_matrix)
+    total_costs.append(total_cost)
 
-# # Scatter Plot 2: Efficiency in terms of Optimality (Path Length) and Time
-# plt.figure(figsize=(8, 6))
-# plt.scatter(path_lengths, time_taken, c=['r', 'g', 'b'], s=100, label=algorithms)
-# for i, alg in enumerate(algorithms):
-#     plt.text(path_lengths[i], time_taken[i], alg, fontsize=12, ha='right')
-# plt.title('Path Length (Optimality) vs. Time for Search Algorithms')
-# plt.xlabel('Path Length (Number of Nodes)')
-# plt.ylabel('Time Taken (seconds)')
-# plt.grid(True)
-# plt.show()
+plt.figure(figsize=(8, 6))
+plt.scatter(memory_usage, time_taken, s=100)
+for i, alg in enumerate(algorithms):
+    plt.text(memory_usage[i], time_taken[i], alg, fontsize=12, ha='right')
+plt.title('Time vs. Memory Usage for Search Algorithms')
+plt.xlabel('Memory Used (KB)')
+plt.ylabel('Time Taken (seconds)')
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(8, 6))
+plt.scatter(total_costs, time_taken, s=100)
+for i, alg in enumerate(algorithms):
+    plt.text(total_costs[i], time_taken[i], alg, fontsize=12, ha='right')
+plt.title('Total Cost (Optimality) vs. Time for Search Algorithms')
+plt.xlabel('Total Cost of Paths')
+plt.ylabel('Time Taken (seconds)')
+plt.grid(True)
+plt.show()
