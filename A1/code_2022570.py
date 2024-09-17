@@ -430,7 +430,7 @@ if __name__ == "__main__":
 def get_memory_usage():
     process = psutil.Process()
     memory_info = process.memory_info()
-    return memory_info.rss
+    return memory_info.rss // 1024
 
 
 def performance_test(adj_matrix, node_attributes):
@@ -468,8 +468,8 @@ def performance_test(adj_matrix, node_attributes):
     end_time_bds = time.time()
     end_memory_bds = get_memory_usage()
 
-    print("Memory used for BDS:", end_memory_bds - start_memory_bds, "bytes")
-    print("Time taken for BDS:", end_time_bds - start_time_bds, "seconds")
+    print(f"Memory used for BDS: {end_memory_bds - start_memory_bds} KB")
+    print(f"Time taken for BDS: {end_time_bds - start_time_bds} seconds")
 
     # A* Performance Test
     start_memory_astar = get_memory_usage()
@@ -483,8 +483,8 @@ def performance_test(adj_matrix, node_attributes):
     end_time_astar = time.time()
     end_memory_astar = get_memory_usage()
 
-    print("Memory used for A*:", end_memory_astar - start_memory_astar, "bytes")
-    print("Time taken for A*:", end_time_astar - start_time_astar, "seconds")
+    print(f"Memory used for A*: {end_memory_astar - start_memory_astar} KB")
+    print(f"Time taken for A*: {end_time_astar - start_time_astar} seconds")
 
     # BHDS Performance Test
     start_memory_bhds = get_memory_usage()
@@ -498,8 +498,8 @@ def performance_test(adj_matrix, node_attributes):
     end_time_bhds = time.time()
     end_memory_bhds = get_memory_usage()
 
-    print("Memory used for BHDS:", end_memory_bhds - start_memory_bhds, "bytes")
-    print("Time taken for BHDS:", end_time_bhds - start_time_bhds, "seconds")
+    print(f"Memory used for BHDS: {end_memory_bhds - start_memory_bhds} KB")
+    print(f"Time taken for BHDS: {end_time_bhds - start_time_bhds} seconds")
 
     # Return the paths and performance data
     return {
@@ -526,5 +526,15 @@ def performance_test(adj_matrix, node_attributes):
     }
 
 
-# Run the performance test and store results
 results = performance_test(adj_matrix, node_attributes)
+
+for algorithm, data in results.items():
+    print(f"\n--- {algorithm} Paths ---")
+    for path_info in data['paths']:
+        start, goal, path = path_info
+        print(f"Path from {start} to {goal}: {path if path else 'No path found'}")
+
+for algorithm, data in results.items():
+    print(f"\n--- {algorithm} Performance ---")
+    print(f"Memory used: {data['memory_used']} KB")
+    print(f"Time taken: {data['time_taken']} seconds")
