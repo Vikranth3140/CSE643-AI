@@ -1,0 +1,15 @@
+--- IDS Performance ---
+Memory used: -39008 KB
+Time taken: 11240.016671657562 seconds
+
+--- BDS Performance ---
+Memory used: 2300 KB
+Time taken: 3.136460065841675 seconds
+
+--- A* Performance ---
+Memory used: 2040 KB
+Time taken: 7.463478326797485 seconds
+
+--- BHDS Performance ---
+Memory used: 1844 KB
+Time taken: 5.247537136077881 seconds
