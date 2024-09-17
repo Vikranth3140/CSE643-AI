@@ -48,9 +48,12 @@ from collections import deque
 def is_reachable_bfs(adj_matrix, start_node, goal_node):
     visited = set()
     queue = deque([start_node])
+    print(f"Starting BFS from node {start_node}")
     while queue:
         node = queue.popleft()
+        print(f"Checking node {node} in BFS")
         if node == goal_node:
+            print(f"Goal node {goal_node} found in BFS!")
             return True
         visited.add(node)
 
@@ -58,24 +61,30 @@ def is_reachable_bfs(adj_matrix, start_node, goal_node):
             if adj_matrix[node][neighbor] > 0 and neighbor not in visited:
                 visited.add(neighbor)  # Mark the node as visited here to prevent duplicate checks
                 queue.append(neighbor)
+                print(f"Adding neighbor {neighbor} to BFS queue")
+    print("Goal node not found in BFS.")
     return False
 
 
 def depth_limited_search(adj_matrix, start_node, goal_node, limit):
     stack = [(start_node, [start_node], limit)]  # Stack for the iterative DFS
-    visited = set()
+    print(f"\nStarting depth-limited search with limit {limit} from node {start_node}")
     
     while stack:
         node, path, depth = stack.pop()
-
+        print(f"Checking node {node} with depth {depth} in depth-limited search")
+        
         if node == goal_node:
+            print(f"Goal node {goal_node} found in depth-limited search!")
             return path
 
         if depth > 0:
             for neighbor in range(len(adj_matrix[node])):
                 if adj_matrix[node][neighbor] > 0 and neighbor not in path:  # Only proceed if not already in path
                     stack.append((neighbor, path + [neighbor], depth - 1))
+                    print(f"Adding neighbor {neighbor} to stack with depth {depth - 1}")
     
+    print(f"Goal node {goal_node} not found within depth limit {limit}.")
     return None
 
 
@@ -87,9 +96,13 @@ def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
     max_depth = int(max_depth) if max_depth != float('inf') else 1000
 
     for depth in tqdm(range(max_depth + 1), desc="Searching with depth limits"):
+        print(f"\nDepth limit: {depth}")
         path = depth_limited_search(adj_matrix, start_node, goal_node, depth)
         if path:
+            print(f"Path found: {path}")
             return path
+
+    print("No path found with IDS.")
     return None
 
 
