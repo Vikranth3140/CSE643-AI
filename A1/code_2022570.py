@@ -5,6 +5,7 @@ import heapq
 import math
 import psutil
 import time
+import matplotlib.pyplot as plt
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -83,6 +84,7 @@ def depth_limited_search(adj_matrix, start_node, goal_node, limit, visited=None)
 
 def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
     if not is_reachable_bfs(adj_matrix, start_node, goal_node):
+        print(f"No path exists between {start_node} and {goal_node}. Skipping IDS.")
         return None
     
     max_depth = int(max_depth) if max_depth != float('inf') else 1000
@@ -447,14 +449,15 @@ def performance_test(adj_matrix, node_attributes):
 
     # for i in range(num_nodes):
     #     for j in range(i + 1, num_nodes):
+    #         # Run IDS only if a path exists
     #         path = get_ids_path(adj_matrix, i, j)
     #         ids_paths.append((i, j, path))
 
     # end_time_ids = time.time()
     # end_memory_ids = get_memory_usage()
 
-    # print("Memory used for IDS:", end_memory_ids - start_memory_ids, "bytes")
-    # print("Time taken for IDS:", end_time_ids - start_time_ids, "seconds")
+    print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
+    print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
 
     # BDS Performance Test
     start_memory_bds = get_memory_usage()
@@ -538,3 +541,34 @@ for algorithm, data in results.items():
     print(f"\n--- {algorithm} Performance ---")
     print(f"Memory used: {data['memory_used']} KB")
     print(f"Time taken: {data['time_taken']} seconds")
+
+
+
+
+# # Extracting data for plotting
+# algorithms = list(results_data.keys())
+# memory_usage = [results_data[alg]['memory_used'] for alg in algorithms]
+# time_taken = [results_data[alg]['time_taken'] for alg in algorithms]
+# path_lengths = [results_data[alg]['path_length'] for alg in algorithms]
+
+# # Scatter Plot 1: Efficiency in terms of Time and Memory Usage
+# plt.figure(figsize=(8, 6))
+# plt.scatter(memory_usage, time_taken, c=['r', 'g', 'b'], s=100, label=algorithms)
+# for i, alg in enumerate(algorithms):
+#     plt.text(memory_usage[i], time_taken[i], alg, fontsize=12, ha='right')
+# plt.title('Time vs. Memory Usage for Search Algorithms')
+# plt.xlabel('Memory Used (KB)')
+# plt.ylabel('Time Taken (seconds)')
+# plt.grid(True)
+# plt.show()
+
+# # Scatter Plot 2: Efficiency in terms of Optimality (Path Length) and Time
+# plt.figure(figsize=(8, 6))
+# plt.scatter(path_lengths, time_taken, c=['r', 'g', 'b'], s=100, label=algorithms)
+# for i, alg in enumerate(algorithms):
+#     plt.text(path_lengths[i], time_taken[i], alg, fontsize=12, ha='right')
+# plt.title('Path Length (Optimality) vs. Time for Search Algorithms')
+# plt.xlabel('Path Length (Number of Nodes)')
+# plt.ylabel('Time Taken (seconds)')
+# plt.grid(True)
+# plt.show()
