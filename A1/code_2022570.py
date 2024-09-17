@@ -443,18 +443,18 @@ def performance_test(adj_matrix, node_attributes):
     astar_paths = []
     bhds_paths = []
 
-    # # IDS Performance Test
-    # start_memory_ids = get_memory_usage()
-    # start_time_ids = time.time()
+    # IDS Performance Test
+    start_memory_ids = get_memory_usage()
+    start_time_ids = time.time()
 
-    # for i in range(num_nodes):
-    #     for j in range(i + 1, num_nodes):
-    #         # Run IDS only if a path exists
-    #         path = get_ids_path(adj_matrix, i, j)
-    #         ids_paths.append((i, j, path))
+    for i in range(num_nodes):
+        for j in range(i + 1, num_nodes):
+            # Run IDS only if a path exists
+            path = get_ids_path(adj_matrix, i, j)
+            ids_paths.append((i, j, path))
 
-    # end_time_ids = time.time()
-    # end_memory_ids = get_memory_usage()
+    end_time_ids = time.time()
+    end_memory_ids = get_memory_usage()
 
     print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
     print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
@@ -506,11 +506,11 @@ def performance_test(adj_matrix, node_attributes):
 
     # Return the paths and performance data
     return {
-        # 'IDS': {
-        #     'paths': ids_paths,
-        #     'memory_used': end_memory_ids - start_memory_ids,
-        #     'time_taken': end_time_ids - start_time_ids
-        # },
+        'IDS': {
+            'paths': ids_paths,
+            'memory_used': end_memory_ids - start_memory_ids,
+            'time_taken': end_time_ids - start_time_ids
+        },
         'BDS': {
             'paths': bds_paths,
             'memory_used': end_memory_bds - start_memory_bds,

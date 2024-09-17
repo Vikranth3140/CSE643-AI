@@ -6,6 +6,7 @@ import math
 import psutil
 import time
 import matplotlib.pyplot as plt
+from collections import deque
 
 # General Notes:
 # - Update the provided file name (code_<RollNumber>.py) as per the instructions.
@@ -46,38 +47,34 @@ import matplotlib.pyplot as plt
 
 def is_reachable_bfs(adj_matrix, start_node, goal_node):
     visited = set()
-    queue = [start_node]
+    queue = deque([start_node])
     while queue:
-        node = queue.pop(0)
+        node = queue.popleft()
         if node == goal_node:
             return True
         visited.add(node)
-        
+
         for neighbor in range(len(adj_matrix[node])):
             if adj_matrix[node][neighbor] > 0 and neighbor not in visited:
+                visited.add(neighbor)  # Mark the node as visited here to prevent duplicate checks
                 queue.append(neighbor)
     return False
 
 
-def depth_limited_search(adj_matrix, start_node, goal_node, limit, visited=None):
-    if visited is None:
-        visited = set()
+def depth_limited_search(adj_matrix, start_node, goal_node, limit):
+    stack = [(start_node, [start_node], limit)]  # Stack for the iterative DFS
+    visited = set()
     
-    if start_node == goal_node:
-        return [start_node]
-    
-    if limit <= 0:
-        return None
-    
-    visited.add(start_node)
+    while stack:
+        node, path, depth = stack.pop()
 
-    for neighbor in range(len(adj_matrix[start_node])):
-        if adj_matrix[start_node][neighbor] > 0 and neighbor not in visited:
-            path = depth_limited_search(adj_matrix, neighbor, goal_node, limit - 1, visited)
-            if path:
-                return [start_node] + path
-    
-    visited.remove(start_node)
+        if node == goal_node:
+            return path
+
+        if depth > 0:
+            for neighbor in range(len(adj_matrix[node])):
+                if adj_matrix[node][neighbor] > 0 and neighbor not in path:  # Only proceed if not already in path
+                    stack.append((neighbor, path + [neighbor], depth - 1))
     
     return None
 
@@ -86,11 +83,11 @@ def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
     if not is_reachable_bfs(adj_matrix, start_node, goal_node):
         print(f"No path exists between {start_node} and {goal_node}. Skipping IDS.")
         return None
-    
+
     max_depth = int(max_depth) if max_depth != float('inf') else 1000
+
     for depth in tqdm(range(max_depth + 1), desc="Searching with depth limits"):
-        visited = set()
-        path = depth_limited_search(adj_matrix, start_node, goal_node, depth, visited)
+        path = depth_limited_search(adj_matrix, start_node, goal_node, depth)
         if path:
             return path
     return None
