@@ -436,19 +436,25 @@ def get_memory_usage():
 def performance_test(adj_matrix, node_attributes):
     num_nodes = len(node_attributes)
 
+    ids_paths = []
+    bds_paths = []
+    astar_paths = []
+    bhds_paths = []
+
     # # IDS Performance Test
     # start_memory_ids = get_memory_usage()
     # start_time_ids = time.time()
 
     # for i in range(num_nodes):
     #     for j in range(i + 1, num_nodes):
-    #         get_ids_path(adj_matrix, i, j)
+    #         path = get_ids_path(adj_matrix, i, j)
+    #         ids_paths.append((i, j, path))
 
     # end_time_ids = time.time()
     # end_memory_ids = get_memory_usage()
 
-    # print("Memory used for IDS:", (end_memory_ids - start_memory_ids) / (1024 ** 2), "MB")
-    # print("Time taken for IDS:", (end_time_ids - start_time_ids), "seconds")
+    # print("Memory used for IDS:", end_memory_ids - start_memory_ids, "bytes")
+    # print("Time taken for IDS:", end_time_ids - start_time_ids, "seconds")
 
     # BDS Performance Test
     start_memory_bds = get_memory_usage()
@@ -456,13 +462,14 @@ def performance_test(adj_matrix, node_attributes):
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
-            get_bidirectional_search_path(adj_matrix, i, j)
+            path = get_bidirectional_search_path(adj_matrix, i, j)
+            bds_paths.append((i, j, path))
 
     end_time_bds = time.time()
     end_memory_bds = get_memory_usage()
 
-    print("Memory used for BDS:", (end_memory_bds - start_memory_bds) / (1024 ** 2), "MB")
-    print("Time taken for BDS:", (end_time_bds - start_time_bds), "seconds")
+    print("Memory used for BDS:", end_memory_bds - start_memory_bds, "bytes")
+    print("Time taken for BDS:", end_time_bds - start_time_bds, "seconds")
 
     # A* Performance Test
     start_memory_astar = get_memory_usage()
@@ -470,13 +477,14 @@ def performance_test(adj_matrix, node_attributes):
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
-            get_astar_search_path(adj_matrix, node_attributes, i, j)
+            path = get_astar_search_path(adj_matrix, node_attributes, i, j)
+            astar_paths.append((i, j, path))
 
     end_time_astar = time.time()
     end_memory_astar = get_memory_usage()
 
-    print("Memory used for A*:", (end_memory_astar - start_memory_astar) / (1024 ** 2), "MB")
-    print("Time taken for A*:", (end_time_astar - start_time_astar), "seconds")
+    print("Memory used for A*:", end_memory_astar - start_memory_astar, "bytes")
+    print("Time taken for A*:", end_time_astar - start_time_astar, "seconds")
 
     # BHDS Performance Test
     start_memory_bhds = get_memory_usage()
@@ -484,13 +492,39 @@ def performance_test(adj_matrix, node_attributes):
 
     for i in range(num_nodes):
         for j in range(i + 1, num_nodes):
-            get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, i, j)
+            path = get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, i, j)
+            bhds_paths.append((i, j, path))
 
     end_time_bhds = time.time()
     end_memory_bhds = get_memory_usage()
 
-    print("Memory used for BHDS:", (end_memory_bhds - start_memory_bhds) / (1024 ** 2), "MB")
-    print("Time taken for BHDS:", (end_time_bhds - start_time_bhds), "seconds")
+    print("Memory used for BHDS:", end_memory_bhds - start_memory_bhds, "bytes")
+    print("Time taken for BHDS:", end_time_bhds - start_time_bhds, "seconds")
+
+    # Return the paths and performance data
+    return {
+        # 'IDS': {
+        #     'paths': ids_paths,
+        #     'memory_used': end_memory_ids - start_memory_ids,
+        #     'time_taken': end_time_ids - start_time_ids
+        # },
+        'BDS': {
+            'paths': bds_paths,
+            'memory_used': end_memory_bds - start_memory_bds,
+            'time_taken': end_time_bds - start_time_bds
+        },
+        'A*': {
+            'paths': astar_paths,
+            'memory_used': end_memory_astar - start_memory_astar,
+            'time_taken': end_time_astar - start_time_astar
+        },
+        'BHDS': {
+            'paths': bhds_paths,
+            'memory_used': end_memory_bhds - start_memory_bhds,
+            'time_taken': end_time_bhds - start_time_bhds
+        }
+    }
 
 
-performance_test(adj_matrix, node_attributes)
+# Run the performance test and store results
+results = performance_test(adj_matrix, node_attributes)
