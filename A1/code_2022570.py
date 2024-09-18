@@ -87,11 +87,11 @@ def depth_limited_search(adj_matrix, start_node, goal_node, limit, visited=None)
 
 def get_ids_path(adj_matrix, start_node, goal_node, max_depth=float('inf')):
     if not is_reachable_bfs(adj_matrix, start_node, goal_node):
-        print(f"No path exists between {start_node} and {goal_node}. Skipping IDS.")
+        # print(f"No path exists between {start_node} and {goal_node}. Skipping IDS.")
         return None
     
     max_depth = int(max_depth) if max_depth != float('inf') else 1000
-    for depth in tqdm(range(max_depth + 1), desc="Searching with depth limits"):
+    for depth in range(max_depth + 1):
         visited = set()
         path = depth_limited_search(adj_matrix, start_node, goal_node, depth, visited)
         if path:
@@ -431,202 +431,202 @@ if __name__ == "__main__":
 
 
 
-def get_memory_usage():
-    process = psutil.Process()
-    memory_info = process.memory_info()
-    return memory_info.rss // 1024
+# def get_memory_usage():
+#     process = psutil.Process()
+#     memory_info = process.memory_info()
+#     return memory_info.rss // 1024
 
-def performance_test(adj_matrix, node_attributes):
-    num_nodes = len(node_attributes)
+# def performance_test(adj_matrix, node_attributes):
+#     num_nodes = len(node_attributes)
 
-    ids_paths = []
-    bds_paths = []
-    astar_paths = []
-    bhds_paths = []
+#     ids_paths = []
+#     bds_paths = []
+#     astar_paths = []
+#     bhds_paths = []
 
-    # IDS Performance Test
-    start_memory_ids = get_memory_usage()
-    start_time_ids = time.time()
+#     # IDS Performance Test
+#     start_memory_ids = get_memory_usage()
+#     start_time_ids = time.time()
 
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            path = get_ids_path(adj_matrix, i, j)
-            ids_paths.append((i, j, path))
+#     for i in range(num_nodes):
+#         for j in range(i + 1, num_nodes):
+#             path = get_ids_path(adj_matrix, i, j)
+#             ids_paths.append((i, j, path))
 
-    end_time_ids = time.time()
-    end_memory_ids = get_memory_usage()
+#     end_time_ids = time.time()
+#     end_memory_ids = get_memory_usage()
 
-    print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
-    print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
+#     print(f"Memory used for IDS: {end_memory_ids - start_memory_ids} KB")
+#     print(f"Time taken for IDS: {end_time_ids - start_time_ids} seconds")
 
-    # BDS Performance Test
-    start_memory_bds = get_memory_usage()
-    start_time_bds = time.time()
+#     # BDS Performance Test
+#     start_memory_bds = get_memory_usage()
+#     start_time_bds = time.time()
 
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            path = get_bidirectional_search_path(adj_matrix, i, j)
-            bds_paths.append((i, j, path))
+#     for i in range(num_nodes):
+#         for j in range(i + 1, num_nodes):
+#             path = get_bidirectional_search_path(adj_matrix, i, j)
+#             bds_paths.append((i, j, path))
 
-    end_time_bds = time.time()
-    end_memory_bds = get_memory_usage()
+#     end_time_bds = time.time()
+#     end_memory_bds = get_memory_usage()
     
-    print(f"Memory used for BDS: {end_memory_bds - start_memory_bds} KB")
-    print(f"Time taken for BDS: {end_time_bds - start_time_bds} seconds")
+#     print(f"Memory used for BDS: {end_memory_bds - start_memory_bds} KB")
+#     print(f"Time taken for BDS: {end_time_bds - start_time_bds} seconds")
 
-    # A* Performance Test
-    start_memory_astar = get_memory_usage()
-    start_time_astar = time.time()
+#     # A* Performance Test
+#     start_memory_astar = get_memory_usage()
+#     start_time_astar = time.time()
 
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            path = get_astar_search_path(adj_matrix, node_attributes, i, j)
-            astar_paths.append((i, j, path))
+#     for i in range(num_nodes):
+#         for j in range(i + 1, num_nodes):
+#             path = get_astar_search_path(adj_matrix, node_attributes, i, j)
+#             astar_paths.append((i, j, path))
 
-    end_time_astar = time.time()
-    end_memory_astar = get_memory_usage()
+#     end_time_astar = time.time()
+#     end_memory_astar = get_memory_usage()
 
-    print(f"Memory used for A*: {end_memory_astar - start_memory_astar} KB")
-    print(f"Time taken for A*: {end_time_astar - start_time_astar} seconds")
+#     print(f"Memory used for A*: {end_memory_astar - start_memory_astar} KB")
+#     print(f"Time taken for A*: {end_time_astar - start_time_astar} seconds")
 
-    # BHDS Performance Test
-    start_memory_bhds = get_memory_usage()
-    start_time_bhds = time.time()
+#     # BHDS Performance Test
+#     start_memory_bhds = get_memory_usage()
+#     start_time_bhds = time.time()
 
-    for i in range(num_nodes):
-        for j in range(i + 1, num_nodes):
-            path = get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, i, j)
-            bhds_paths.append((i, j, path))
+#     for i in range(num_nodes):
+#         for j in range(i + 1, num_nodes):
+#             path = get_bidirectional_heuristic_search_path(adj_matrix, node_attributes, i, j)
+#             bhds_paths.append((i, j, path))
 
-    end_time_bhds = time.time()
-    end_memory_bhds = get_memory_usage()
+#     end_time_bhds = time.time()
+#     end_memory_bhds = get_memory_usage()
 
-    print(f"Memory used for BHDS: {end_memory_bhds - start_memory_bhds} KB")
-    print(f"Time taken for BHDS: {end_time_bhds - start_time_bhds} seconds")
+#     print(f"Memory used for BHDS: {end_memory_bhds - start_memory_bhds} KB")
+#     print(f"Time taken for BHDS: {end_time_bhds - start_time_bhds} seconds")
 
-    return {
-        'IDS': {
-            'paths': ids_paths,
-            'memory_used': end_memory_ids - start_memory_ids,
-            'time_taken': end_time_ids - start_time_ids
-        },
-        'BDS': {
-            'paths': bds_paths,
-            'memory_used': end_memory_bds - start_memory_bds,
-            'time_taken': end_time_bds - start_time_bds
-        },
-        'A*': {
-            'paths': astar_paths,
-            'memory_used': end_memory_astar - start_memory_astar,
-            'time_taken': end_time_astar - start_time_astar
-        },
-        'BHDS': {
-            'paths': bhds_paths,
-            'memory_used': end_memory_bhds - start_memory_bhds,
-            'time_taken': end_time_bhds - start_time_bhds
-        }
-    }
-
-
-results = performance_test(adj_matrix, node_attributes)
-
-with open('paths.txt', 'w') as f:
-    for algorithm, data in results.items():
-        f.write(f"\n--- {algorithm} Paths ---\n")
-        for path_info in data['paths']:
-            start, goal, path = path_info
-            if path:
-                path_str = ' -> '.join(map(str, path))
-                f.write(f"Path from {start} to {goal}: {path_str}\n")
-            else:
-                f.write(f"Path from {start} to {goal}: No path found\n")
-
-for algorithm, data in results.items():
-    print(f"\n--- {algorithm} Performance ---")
-    print(f"Memory used: {data['memory_used']} KB")
-    print(f"Time taken: {data['time_taken']} seconds")
-
-with open('performance.txt', 'w') as f:
-    for algorithm, data in results.items():
-        f.write(f"\n--- {algorithm} Performance ---\n")
-        f.write(f"Memory used: {data['memory_used']} KB\n")
-        f.write(f"Time taken: {data['time_taken']} seconds\n")
-
-algorithms = list(results.keys())
-memory_usage = [results[alg]['memory_used'] for alg in algorithms]
-time_taken = [results[alg]['time_taken'] for alg in algorithms]
-
-def calculate_total_path_length(paths):
-    total_length = 0
-    for _, _, path in paths:
-        if path:
-            total_length += len(path) - 1
-    return total_length
-
-def calculate_total_cost(paths, adj_matrix):
-    total_cost = 0
-    for _, _, path in paths:
-        if path:
-            for i in range(len(path) - 1):
-                total_cost += adj_matrix[path[i]][path[i+1]]
-    return total_cost
-
-path_lengths = []
-total_costs = []
-for alg in algorithms:
-    paths = results[alg]['paths']
-    path_length = calculate_total_path_length(paths)
-    path_lengths.append(path_length)
-    total_cost = calculate_total_cost(paths, adj_matrix)
-    total_costs.append(total_cost)
-
-os.makedirs('Plots', exist_ok=True)
+#     return {
+#         'IDS': {
+#             'paths': ids_paths,
+#             'memory_used': end_memory_ids - start_memory_ids,
+#             'time_taken': end_time_ids - start_time_ids
+#         },
+#         'BDS': {
+#             'paths': bds_paths,
+#             'memory_used': end_memory_bds - start_memory_bds,
+#             'time_taken': end_time_bds - start_time_bds
+#         },
+#         'A*': {
+#             'paths': astar_paths,
+#             'memory_used': end_memory_astar - start_memory_astar,
+#             'time_taken': end_time_astar - start_time_astar
+#         },
+#         'BHDS': {
+#             'paths': bhds_paths,
+#             'memory_used': end_memory_bhds - start_memory_bhds,
+#             'time_taken': end_time_bhds - start_time_bhds
+#         }
+#     }
 
 
-plt.figure(figsize=(8, 6))
-plt.scatter(time_taken, memory_usage, s=100)
-for i, alg in enumerate(algorithms):
-    plt.text(time_taken[i], memory_usage[i], alg, fontsize=12, ha='right')
-plt.title('Memory vs. Time for Search Algorithms')
-plt.xlabel('Time Taken (seconds)')
-plt.ylabel('Memory Used (KB)')
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('Plots/Memory_vs_Time.png')
-plt.close()
+# results = performance_test(adj_matrix, node_attributes)
 
-plt.figure(figsize=(8, 6))
-plt.scatter(time_taken, total_costs, s=100)
-for i, alg in enumerate(algorithms):
-    plt.text(time_taken[i], total_costs[i], alg, fontsize=12, ha='right')
-plt.title('Total Cost vs. Time for Search Algorithms')
-plt.xlabel('Time Taken (seconds)')
-plt.ylabel('Total Cost of Paths')
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('Plots/Total_Cost_vs_Time.png')
-plt.close()
+# with open('paths.txt', 'w') as f:
+#     for algorithm, data in results.items():
+#         f.write(f"\n--- {algorithm} Paths ---\n")
+#         for path_info in data['paths']:
+#             start, goal, path = path_info
+#             if path:
+#                 path_str = ' -> '.join(map(str, path))
+#                 f.write(f"Path from {start} to {goal}: {path_str}\n")
+#             else:
+#                 f.write(f"Path from {start} to {goal}: No path found\n")
 
-plt.figure(figsize=(8, 6))
-plt.scatter(total_costs, time_taken, s=100)
-for i, alg in enumerate(algorithms):
-    plt.text(total_costs[i], time_taken[i], alg, fontsize=12, ha='right')
-plt.title('Time vs. Total Cost (Optimality)')
-plt.xlabel('Total Cost of Paths')
-plt.ylabel('Time Taken (seconds)')
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('Plots/Time_vs_Total_Cost.png')
-plt.close()
+# for algorithm, data in results.items():
+#     print(f"\n--- {algorithm} Performance ---")
+#     print(f"Memory used: {data['memory_used']} KB")
+#     print(f"Time taken: {data['time_taken']} seconds")
 
-plt.figure(figsize=(8, 6))
-plt.scatter(total_costs, memory_usage, s=100)
-for i, alg in enumerate(algorithms):
-    plt.text(total_costs[i], memory_usage[i], alg, fontsize=12, ha='right')
-plt.title('Memory Usage vs. Total Cost (Optimality)')
-plt.xlabel('Total Cost of Paths')
-plt.ylabel('Memory Used (KB)')
-plt.grid(True)
-plt.tight_layout()
-plt.savefig('Plots/Memory_vs_Total_Cost.png')
-plt.close()
+# with open('performance.txt', 'w') as f:
+#     for algorithm, data in results.items():
+#         f.write(f"\n--- {algorithm} Performance ---\n")
+#         f.write(f"Memory used: {data['memory_used']} KB\n")
+#         f.write(f"Time taken: {data['time_taken']} seconds\n")
+
+# algorithms = list(results.keys())
+# memory_usage = [results[alg]['memory_used'] for alg in algorithms]
+# time_taken = [results[alg]['time_taken'] for alg in algorithms]
+
+# def calculate_total_path_length(paths):
+#     total_length = 0
+#     for _, _, path in paths:
+#         if path:
+#             total_length += len(path) - 1
+#     return total_length
+
+# def calculate_total_cost(paths, adj_matrix):
+#     total_cost = 0
+#     for _, _, path in paths:
+#         if path:
+#             for i in range(len(path) - 1):
+#                 total_cost += adj_matrix[path[i]][path[i+1]]
+#     return total_cost
+
+# path_lengths = []
+# total_costs = []
+# for alg in algorithms:
+#     paths = results[alg]['paths']
+#     path_length = calculate_total_path_length(paths)
+#     path_lengths.append(path_length)
+#     total_cost = calculate_total_cost(paths, adj_matrix)
+#     total_costs.append(total_cost)
+
+# os.makedirs('Plots', exist_ok=True)
+
+
+# plt.figure(figsize=(8, 6))
+# plt.scatter(time_taken, memory_usage, s=100)
+# for i, alg in enumerate(algorithms):
+#     plt.text(time_taken[i], memory_usage[i], alg, fontsize=12, ha='right')
+# plt.title('Memory vs. Time for Search Algorithms')
+# plt.xlabel('Time Taken (seconds)')
+# plt.ylabel('Memory Used (KB)')
+# plt.grid(True)
+# plt.tight_layout()
+# plt.savefig('Plots/Memory_vs_Time.png')
+# plt.close()
+
+# plt.figure(figsize=(8, 6))
+# plt.scatter(time_taken, total_costs, s=100)
+# for i, alg in enumerate(algorithms):
+#     plt.text(time_taken[i], total_costs[i], alg, fontsize=12, ha='right')
+# plt.title('Total Cost vs. Time for Search Algorithms')
+# plt.xlabel('Time Taken (seconds)')
+# plt.ylabel('Total Cost of Paths')
+# plt.grid(True)
+# plt.tight_layout()
+# plt.savefig('Plots/Total_Cost_vs_Time.png')
+# plt.close()
+
+# plt.figure(figsize=(8, 6))
+# plt.scatter(total_costs, time_taken, s=100)
+# for i, alg in enumerate(algorithms):
+#     plt.text(total_costs[i], time_taken[i], alg, fontsize=12, ha='right')
+# plt.title('Time vs. Total Cost (Optimality)')
+# plt.xlabel('Total Cost of Paths')
+# plt.ylabel('Time Taken (seconds)')
+# plt.grid(True)
+# plt.tight_layout()
+# plt.savefig('Plots/Time_vs_Total_Cost.png')
+# plt.close()
+
+# plt.figure(figsize=(8, 6))
+# plt.scatter(total_costs, memory_usage, s=100)
+# for i, alg in enumerate(algorithms):
+#     plt.text(total_costs[i], memory_usage[i], alg, fontsize=12, ha='right')
+# plt.title('Memory Usage vs. Total Cost (Optimality)')
+# plt.xlabel('Total Cost of Paths')
+# plt.ylabel('Memory Used (KB)')
+# plt.grid(True)
+# plt.tight_layout()
+# plt.savefig('Plots/Memory_vs_Total_Cost.png')
+# plt.close()
