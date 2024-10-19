@@ -40,7 +40,27 @@ def load_static_data():
         - Dictionary containing the loaded data for routes, trips, stops, stop times, and fare rules.
 
     """
-    pass
+    
+    # Loading the data into pandas DataFrames
+    data = {}
+    
+    # Load each dataset using pandas
+    data['routes'] = pd.read_csv('A2/GTFS/routes.txt', dtype={'route_id': int, 'agency_id': str, 'route_type': int})
+    data['trips'] = pd.read_csv('A2/GTFS/trips.txt', dtype={'route_id': int, 'trip_id': str, 'service_id': int})
+    data['stops'] = pd.read_csv('A2/GTFS/stops.txt', dtype={'stop_id': int, 'stop_code': str, 'stop_lat': float, 'stop_lon': float, 'stop_name': str, 'zone_id': str})
+
+    # For stop_times.txt, we need to convert time fields to datetime
+    stop_times = pd.read_csv('A2/GTFS/stop_times.txt', dtype={'trip_id': str, 'stop_id': int, 'stop_sequence': int})
+    
+    # Convert time strings to datetime objects (handling times as string 'HH:MM:SS')
+    stop_times['arrival_time'] = pd.to_datetime(stop_times['arrival_time'], format='%H:%M:%S').dt.time
+    stop_times['departure_time'] = pd.to_datetime(stop_times['departure_time'], format='%H:%M:%S').dt.time
+    data['stop_times'] = stop_times
+    
+    data['fare_rules'] = pd.read_csv('A2/GTFS/fare_rules.txt', dtype={'fare_id': str, 'route_id': int, 'origin_id': int, 'destination_id': int})
+    data['fare_attributes'] = pd.read_csv('A2/GTFS/fare_attributes.txt', dtype={'fare_id': str, 'price': float, 'currency_type': str})
+    
+    return data
 
 # Function to create the Knowledge Base (KB)
 def create_knowledge_base():
