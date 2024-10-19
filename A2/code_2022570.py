@@ -271,7 +271,69 @@ def visualize_stop_route_graph_interactive(route_to_stops):
     Expected Output:
         - Interactive Graph representation using Plotly.
     """
-    pass
+    # Load static data to get stop latitude and longitude information
+    data = load_static_data()  # Load data which includes stop info
+    stops_df = data['stops']  # Get the stops data
+    stop_coords = stops_df.set_index('stop_id')[['stop_lat', 'stop_lon']].to_dict('index')  # Get lat/lon for stops
+    
+    # Initialize NetworkX graph
+    G = nx.Graph()
+
+    # Add edges based on route_to_stops (each route forms multiple edges)
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            stop_a = stops[i]
+            stop_b = stops[i + 1]
+            
+            # Add the edge between stop_a and stop_b
+            G.add_edge(stop_a, stop_b, route=route_id)
+
+    # Get positions for the nodes using the stop coordinates (lat, lon)
+    pos = {stop: (stop_coords[stop]['stop_lon'], stop_coords[stop]['stop_lat']) for stop in G.nodes()}
+
+    # Create Plotly traces for the graph edges (routes)
+    edge_traces = []
+    for edge in G.edges():
+        stop_a, stop_b = edge
+        x0, y0 = pos[stop_a]  # Start node coordinates
+        x1, y1 = pos[stop_b]  # End node coordinates
+        
+        edge_trace = go.Scatter(
+            x=[x0, x1, None],  # x-coordinates of the edge
+            y=[y0, y1, None],  # y-coordinates of the edge
+            line=dict(width=1, color='blue'),
+            hoverinfo='none',
+            mode='lines')
+        
+        edge_traces.append(edge_trace)
+ 
+    # Create Plotly trace for the graph nodes (stops)
+    node_trace = go.Scatter(
+        x=[pos[stop][0] for stop in G.nodes()],  # x-coordinates (longitude)
+        y=[pos[stop][1] for stop in G.nodes()],  # y-coordinates (latitude)
+        text=[f"Stop ID: {stop}" for stop in G.nodes()],  # Text for hover (stop ID)
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            showscale=False,
+            color='orange',
+            size=8,
+            line_width=2))
+
+    # Create the figure with edge and node traces
+    fig = go.Figure(data=edge_traces + [node_trace])
+    
+    # Customize layout for better visualization
+    fig.update_layout(
+        showlegend=False,
+        hovermode='closest',
+        title='Bus Routes and Stops Network',
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False)
+    )
+
+    # Show the interactive graph
+    fig.show()
 
 
 # Q.2: Reasoning
