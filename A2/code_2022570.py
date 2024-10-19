@@ -140,7 +140,27 @@ def get_busiest_routes():
     Expected Output:
         - List of route IDs sorted by the number of trips in descending order.
     """
-    pass
+    # Step 1: Create a count of trips per route using trip_to_route dictionary
+    # Assuming the KB has been set up and we have access to `trip_to_route`
+    
+    # We need to create trip_to_route first, assuming it's available in the KB
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    trip_to_route = knowledge_base['trip_to_route']
+    
+    # Create a dictionary to count the number of trips per route
+    route_trip_count = defaultdict(int)
+    
+    for trip_id, route_id in trip_to_route.items():
+        route_trip_count[route_id] += 1
+    
+    # Step 2: Sort the routes by the number of trips in descending order
+    sorted_routes = sorted(route_trip_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 3: Return the sorted list of route IDs
+    # We only need the route_id, not the count, so we'll return just the route IDs
+    busiest_routes = [route for route, count in sorted_routes]
+    
+    return busiest_routes
 
 # Function to find the stops with the most frequent trips
 def get_most_frequent_stops():
