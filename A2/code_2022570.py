@@ -201,7 +201,27 @@ def get_top_5_busiest_stops():
     Expected Output:
         - List of the top 5 stop IDs sorted by the number of routes passing through them.
     """
-    pass
+    # Step 1: Access the `route_to_stops` dictionary from the Knowledge Base (KB)
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    route_to_stops = knowledge_base['route_to_stops']
+    
+    # Step 2: Create a reverse mapping from `stop_id` to the set of routes passing through each stop
+    stop_to_routes = defaultdict(set)  # We use a set to ensure each route is counted only once per stop
+    
+    for route_id, stops in route_to_stops.items():
+        for stop_id in stops:
+            stop_to_routes[stop_id].add(route_id)  # Add the route to the stop's set of routes
+    
+    # Step 3: Count the number of unique routes for each stop
+    stop_route_count = {stop_id: len(routes) for stop_id, routes in stop_to_routes.items()}
+    
+    # Step 4: Sort the stops by the number of routes in descending order
+    sorted_stops = sorted(stop_route_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 5: Return the top 5 stop IDs
+    top_5_busiest_stops = [stop for stop, count in sorted_stops[:5]]
+    
+    return top_5_busiest_stops
 
 # Function to find pairs of stops with only one direct route between them
 def get_stops_with_one_direct_route():
