@@ -49,18 +49,34 @@ def load_static_data():
     data['trips'] = pd.read_csv('GTFS/trips.txt', dtype={'route_id': str, 'trip_id': str, 'service_id': str})
     data['stops'] = pd.read_csv('GTFS/stops.txt', dtype={'stop_id': str, 'stop_code': str, 'stop_lat': float, 'stop_lon': float, 'stop_name': str, 'zone_id': str})
 
-    # For stop_times.txt, we need to convert time fields to datetime
+    # For stop_times.txt, we need to convert time fields to handle "24+" hour format
     stop_times = pd.read_csv('GTFS/stop_times.txt', dtype={'trip_id': str, 'stop_id': str, 'stop_sequence': int})
     
-    # Convert time strings to datetime objects (handling times as string 'HH:MM:SS')
-    stop_times['arrival_time'] = pd.to_datetime(stop_times['arrival_time'], format='%H:%M:%S').dt.time
-    stop_times['departure_time'] = pd.to_datetime(stop_times['departure_time'], format='%H:%M:%S').dt.time
+    # Convert time strings to "normalized" format (handling times like '24:xx:xx')
+    stop_times['arrival_time'] = stop_times['arrival_time'].apply(convert_gtfs_time)
+    stop_times['departure_time'] = stop_times['departure_time'].apply(convert_gtfs_time)
+    
     data['stop_times'] = stop_times
     
     data['fare_rules'] = pd.read_csv('GTFS/fare_rules.txt', dtype={'fare_id': str, 'route_id': str, 'origin_id': str, 'destination_id': str})
     data['fare_attributes'] = pd.read_csv('GTFS/fare_attributes.txt', dtype={'fare_id': str, 'price': float, 'currency_type': str})
     
     return data
+
+def convert_gtfs_time(time_str):
+    """
+    Function to convert GTFS time format to handle values like "24:xx:xx".
+    GTFS time may exceed 24 hours if the service runs past midnight.
+    """
+    # Split the time into hours, minutes, and seconds
+    h, m, s = map(int, time_str.split(':'))
+    
+    # If the hour is 24 or more, convert to standard time without using timedelta
+    if h >= 24:
+        h = h - 24  # Normalize the hour by subtracting 24
+    
+    # Format the time back to 'HH:MM:SS' string
+    return f'{h:02}:{m:02}:{s:02}'
 
 # Function to create the Knowledge Base (KB)
 def create_knowledge_base():
