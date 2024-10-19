@@ -40,7 +40,43 @@ def load_static_data():
         - Dictionary containing the loaded data for routes, trips, stops, stop times, and fare rules.
 
     """
-    pass
+    
+    # Loading the data into pandas DataFrames
+    data = {}
+    
+    # Load each dataset using pandas
+    data['routes'] = pd.read_csv('GTFS/routes.txt', dtype={'route_id': str, 'agency_id': str, 'route_type': int})
+    data['trips'] = pd.read_csv('GTFS/trips.txt', dtype={'route_id': str, 'trip_id': str, 'service_id': str})
+    data['stops'] = pd.read_csv('GTFS/stops.txt', dtype={'stop_id': str, 'stop_code': str, 'stop_lat': float, 'stop_lon': float, 'stop_name': str, 'zone_id': str})
+
+    # For stop_times.txt, we need to convert time fields to handle "24+" hour format
+    stop_times = pd.read_csv('GTFS/stop_times.txt', dtype={'trip_id': str, 'stop_id': str, 'stop_sequence': int})
+    
+    # Convert time strings to "normalized" format (handling times like '24:xx:xx')
+    stop_times['arrival_time'] = stop_times['arrival_time'].apply(convert_gtfs_time)
+    stop_times['departure_time'] = stop_times['departure_time'].apply(convert_gtfs_time)
+    
+    data['stop_times'] = stop_times
+    
+    data['fare_rules'] = pd.read_csv('GTFS/fare_rules.txt', dtype={'fare_id': str, 'route_id': str, 'origin_id': str, 'destination_id': str})
+    data['fare_attributes'] = pd.read_csv('GTFS/fare_attributes.txt', dtype={'fare_id': str, 'price': float, 'currency_type': str})
+    
+    return data
+
+def convert_gtfs_time(time_str):
+    """
+    Function to convert GTFS time format to handle values like "24:xx:xx".
+    GTFS time may exceed 24 hours if the service runs past midnight.
+    """
+    # Split the time into hours, minutes, and seconds
+    h, m, s = map(int, time_str.split(':'))
+    
+    # If the hour is 24 or more, convert to standard time without using timedelta
+    if h >= 24:
+        h = h - 24  # Normalize the hour by subtracting 24
+    
+    # Format the time back to 'HH:MM:SS' string
+    return f'{h:02}:{m:02}:{s:02}'
 
 # Function to create the Knowledge Base (KB)
 def create_knowledge_base():
@@ -54,7 +90,43 @@ def create_knowledge_base():
     Expected Output:
         - Dictionary mapping route to stops, trip to route, and stop trip count.
     """
-    pass
+    # Load the static data
+    data = load_static_data()  # Call to the data loading function
+    
+    # Initializing the dictionaries
+    route_to_stops = defaultdict(list)  # Maps route_id to a list of stop_ids
+    trip_to_route = {}  # Maps trip_id to route_id
+    stop_trip_count = defaultdict(int)  # Maps stop_id to the count of trips stopping there
+    
+    # Step 1: Build trip_to_route using 'trips' DataFrame
+    trips_df = data['trips']
+    
+    for _, row in trips_df.iterrows():
+        trip_id = row['trip_id']
+        route_id = row['route_id']
+        trip_to_route[trip_id] = route_id
+    
+    # Step 2: Build route_to_stops and stop_trip_count using 'stop_times' DataFrame
+    stop_times_df = data['stop_times']
+    
+    for _, row in stop_times_df.iterrows():
+        trip_id = row['trip_id']
+        stop_id = row['stop_id']
+        
+        # Get the route_id for the current trip_id
+        route_id = trip_to_route[trip_id]
+        
+        # Append stop_id to the list of stops for the route
+        route_to_stops[route_id].append(stop_id)
+        
+        # Increment the stop_trip_count for this stop_id
+        stop_trip_count[stop_id] += 1
+    
+    return {
+        'route_to_stops': dict(route_to_stops),
+        'trip_to_route': trip_to_route,
+        'stop_trip_count': dict(stop_trip_count)
+    }
 
 # Function to find the busiest routes based on the number of trips
 def get_busiest_routes():
@@ -68,7 +140,27 @@ def get_busiest_routes():
     Expected Output:
         - List of route IDs sorted by the number of trips in descending order.
     """
-    pass
+    # Step 1: Create a count of trips per route using trip_to_route dictionary
+    # Assuming the KB has been set up and we have access to `trip_to_route`
+    
+    # We need to create trip_to_route first, assuming it's available in the KB
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    trip_to_route = knowledge_base['trip_to_route']
+    
+    # Create a dictionary to count the number of trips per route
+    route_trip_count = defaultdict(int)
+    
+    for trip_id, route_id in trip_to_route.items():
+        route_trip_count[route_id] += 1
+    
+    # Step 2: Sort the routes by the number of trips in descending order
+    sorted_routes = sorted(route_trip_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 3: Return the sorted list of route IDs
+    # We only need the route_id, not the count, so we'll return just the route IDs
+    busiest_routes = [route for route, count in sorted_routes]
+    
+    return busiest_routes
 
 # Function to find the stops with the most frequent trips
 def get_most_frequent_stops():
@@ -82,7 +174,20 @@ def get_most_frequent_stops():
     Expected Output:
         - List of stop IDs sorted by the frequency of trips in descending order.
     """
-    pass
+    # Step 1: Access the `stop_trip_count` from the Knowledge Base (KB)
+    # Assuming the KB has been set up and we have access to `stop_trip_count`
+    
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    stop_trip_count = knowledge_base['stop_trip_count']
+    
+    # Step 2: Sort the stops by the number of trips in descending order
+    sorted_stops = sorted(stop_trip_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 3: Return the sorted list of stop IDs
+    # We only need the stop_id, not the count, so we'll return just the stop IDs
+    most_frequent_stops = [stop for stop, count in sorted_stops]
+    
+    return most_frequent_stops
 
 # Function to find the top 5 busiest stops based on the number of routes passing through them
 def get_top_5_busiest_stops():
@@ -96,7 +201,27 @@ def get_top_5_busiest_stops():
     Expected Output:
         - List of the top 5 stop IDs sorted by the number of routes passing through them.
     """
-    pass
+    # Step 1: Access the `route_to_stops` dictionary from the Knowledge Base (KB)
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    route_to_stops = knowledge_base['route_to_stops']
+    
+    # Step 2: Create a reverse mapping from `stop_id` to the set of routes passing through each stop
+    stop_to_routes = defaultdict(set)  # We use a set to ensure each route is counted only once per stop
+    
+    for route_id, stops in route_to_stops.items():
+        for stop_id in stops:
+            stop_to_routes[stop_id].add(route_id)  # Add the route to the stop's set of routes
+    
+    # Step 3: Count the number of unique routes for each stop
+    stop_route_count = {stop_id: len(routes) for stop_id, routes in stop_to_routes.items()}
+    
+    # Step 4: Sort the stops by the number of routes in descending order
+    sorted_stops = sorted(stop_route_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 5: Return the top 5 stop IDs
+    top_5_busiest_stops = [stop for stop, count in sorted_stops[:5]]
+    
+    return top_5_busiest_stops
 
 # Function to find pairs of stops with only one direct route between them
 def get_stops_with_one_direct_route():
@@ -110,7 +235,29 @@ def get_stops_with_one_direct_route():
     Expected Output:
         - List of tuples representing pairs of stop IDs with one direct route between them.
     """
-    pass
+    # Step 1: Access the `route_to_stops` dictionary from the Knowledge Base (KB)
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    route_to_stops = knowledge_base['route_to_stops']
+    
+    # Step 2: Create a dictionary to count how many routes connect each pair of stops
+    stop_pair_routes = defaultdict(set)  # Use a set to store unique route IDs for each stop pair
+    
+    # Step 3: For each route, create stop pairs and record the routes
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            stop_a = stops[i]
+            stop_b = stops[i + 1]
+            
+            # Treat (stop_a, stop_b) and (stop_b, stop_a) as the same pair
+            stop_pair = tuple(sorted([stop_a, stop_b]))
+            
+            # Add the route_id to the set of routes connecting this stop pair
+            stop_pair_routes[stop_pair].add(route_id)
+    
+    # Step 4: Find the stop pairs that have only one route connecting them
+    one_direct_route_pairs = [pair for pair, routes in stop_pair_routes.items() if len(routes) == 1]
+    
+    return one_direct_route_pairs
 
 # Function to create a graph representation using Plotly
 def visualize_stop_route_graph_interactive(route_to_stops):
@@ -124,7 +271,69 @@ def visualize_stop_route_graph_interactive(route_to_stops):
     Expected Output:
         - Interactive Graph representation using Plotly.
     """
-    pass
+    # Load static data to get stop latitude and longitude information
+    data = load_static_data()  # Load data which includes stop info
+    stops_df = data['stops']  # Get the stops data
+    stop_coords = stops_df.set_index('stop_id')[['stop_lat', 'stop_lon']].to_dict('index')  # Get lat/lon for stops
+    
+    # Initialize NetworkX graph
+    G = nx.Graph()
+
+    # Add edges based on route_to_stops (each route forms multiple edges)
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            stop_a = stops[i]
+            stop_b = stops[i + 1]
+            
+            # Add the edge between stop_a and stop_b
+            G.add_edge(stop_a, stop_b, route=route_id)
+
+    # Get positions for the nodes using the stop coordinates (lat, lon)
+    pos = {stop: (stop_coords[stop]['stop_lon'], stop_coords[stop]['stop_lat']) for stop in G.nodes()}
+
+    # Create Plotly traces for the graph edges (routes)
+    edge_traces = []
+    for edge in G.edges():
+        stop_a, stop_b = edge
+        x0, y0 = pos[stop_a]  # Start node coordinates
+        x1, y1 = pos[stop_b]  # End node coordinates
+        
+        edge_trace = go.Scatter(
+            x=[x0, x1, None],  # x-coordinates of the edge
+            y=[y0, y1, None],  # y-coordinates of the edge
+            line=dict(width=1, color='blue'),
+            hoverinfo='none',
+            mode='lines')
+        
+        edge_traces.append(edge_trace)
+ 
+    # Create Plotly trace for the graph nodes (stops)
+    node_trace = go.Scatter(
+        x=[pos[stop][0] for stop in G.nodes()],  # x-coordinates (longitude)
+        y=[pos[stop][1] for stop in G.nodes()],  # y-coordinates (latitude)
+        text=[f"Stop ID: {stop}" for stop in G.nodes()],  # Text for hover (stop ID)
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            showscale=False,
+            color='orange',
+            size=8,
+            line_width=2))
+
+    # Create the figure with edge and node traces
+    fig = go.Figure(data=edge_traces + [node_trace])
+    
+    # Customize layout for better visualization
+    fig.update_layout(
+        showlegend=False,
+        hovermode='closest',
+        title='Bus Routes and Stops Network',
+        xaxis=dict(showgrid=False, zeroline=False),
+        yaxis=dict(showgrid=False, zeroline=False)
+    )
+
+    # Show the interactive graph
+    fig.show()
 
 
 # Q.2: Reasoning
