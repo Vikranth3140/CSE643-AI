@@ -74,7 +74,43 @@ def create_knowledge_base():
     Expected Output:
         - Dictionary mapping route to stops, trip to route, and stop trip count.
     """
-    pass
+    # Load the static data
+    data = load_static_data()  # Call to the data loading function
+    
+    # Initializing the dictionaries
+    route_to_stops = defaultdict(list)  # Maps route_id to a list of stop_ids
+    trip_to_route = {}  # Maps trip_id to route_id
+    stop_trip_count = defaultdict(int)  # Maps stop_id to the count of trips stopping there
+    
+    # Step 1: Build trip_to_route using 'trips' DataFrame
+    trips_df = data['trips']
+    
+    for _, row in trips_df.iterrows():
+        trip_id = row['trip_id']
+        route_id = row['route_id']
+        trip_to_route[trip_id] = route_id
+    
+    # Step 2: Build route_to_stops and stop_trip_count using 'stop_times' DataFrame
+    stop_times_df = data['stop_times']
+    
+    for _, row in stop_times_df.iterrows():
+        trip_id = row['trip_id']
+        stop_id = row['stop_id']
+        
+        # Get the route_id for the current trip_id
+        route_id = trip_to_route[trip_id]
+        
+        # Append stop_id to the list of stops for the route
+        route_to_stops[route_id].append(stop_id)
+        
+        # Increment the stop_trip_count for this stop_id
+        stop_trip_count[stop_id] += 1
+    
+    return {
+        'route_to_stops': dict(route_to_stops),
+        'trip_to_route': trip_to_route,
+        'stop_trip_count': dict(stop_trip_count)
+    }
 
 # Function to find the busiest routes based on the number of trips
 def get_busiest_routes():
