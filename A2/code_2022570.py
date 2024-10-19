@@ -174,7 +174,20 @@ def get_most_frequent_stops():
     Expected Output:
         - List of stop IDs sorted by the frequency of trips in descending order.
     """
-    pass
+    # Step 1: Access the `stop_trip_count` from the Knowledge Base (KB)
+    # Assuming the KB has been set up and we have access to `stop_trip_count`
+    
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    stop_trip_count = knowledge_base['stop_trip_count']
+    
+    # Step 2: Sort the stops by the number of trips in descending order
+    sorted_stops = sorted(stop_trip_count.items(), key=lambda x: x[1], reverse=True)
+    
+    # Step 3: Return the sorted list of stop IDs
+    # We only need the stop_id, not the count, so we'll return just the stop IDs
+    most_frequent_stops = [stop for stop, count in sorted_stops]
+    
+    return most_frequent_stops
 
 # Function to find the top 5 busiest stops based on the number of routes passing through them
 def get_top_5_busiest_stops():
