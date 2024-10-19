@@ -235,7 +235,29 @@ def get_stops_with_one_direct_route():
     Expected Output:
         - List of tuples representing pairs of stop IDs with one direct route between them.
     """
-    pass
+    # Step 1: Access the `route_to_stops` dictionary from the Knowledge Base (KB)
+    knowledge_base = create_knowledge_base()  # Load the knowledge base
+    route_to_stops = knowledge_base['route_to_stops']
+    
+    # Step 2: Create a dictionary to count how many routes connect each pair of stops
+    stop_pair_routes = defaultdict(set)  # Use a set to store unique route IDs for each stop pair
+    
+    # Step 3: For each route, create stop pairs and record the routes
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            stop_a = stops[i]
+            stop_b = stops[i + 1]
+            
+            # Treat (stop_a, stop_b) and (stop_b, stop_a) as the same pair
+            stop_pair = tuple(sorted([stop_a, stop_b]))
+            
+            # Add the route_id to the set of routes connecting this stop pair
+            stop_pair_routes[stop_pair].add(route_id)
+    
+    # Step 4: Find the stop pairs that have only one route connecting them
+    one_direct_route_pairs = [pair for pair, routes in stop_pair_routes.items() if len(routes) == 1]
+    
+    return one_direct_route_pairs
 
 # Function to create a graph representation using Plotly
 def visualize_stop_route_graph_interactive(route_to_stops):
