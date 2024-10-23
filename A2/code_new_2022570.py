@@ -61,7 +61,7 @@ def create_kb():
         trip_to_route[row['trip_id']] = row['route_id']
 
     # Map route_id to a list of stops in order of their sequence
-    stop_sequences = df_stop_times.groupby('trip_id').apply(lambda x: x.sort_values(by='stop_sequence'))
+    stop_sequences = df_stop_times.groupby('trip_id').apply(lambda x: x.sort_values(by='stop_sequence')).reset_index(drop=True)
 
     for trip_id, stop_sequence in stop_sequences.groupby('trip_id'):
         route_id = trip_to_route[trip_id]  # Find route ID from trip_id
