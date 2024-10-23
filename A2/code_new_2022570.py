@@ -153,7 +153,21 @@ def get_stops_with_one_direct_route():
               - pair (tuple): A tuple containing two stop IDs (stop_1, stop_2).
               - route_id (str): The ID of the route connecting the two stops.
     """
-    pass  # Implementation here
+    stop_pair_to_route = defaultdict(list)
+
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            stop_pair = (stops[i], stops[i + 1])
+            reverse_pair = (stops[i + 1], stops[i])
+            stop_pair_to_route[stop_pair].append(route_id)
+            stop_pair_to_route[reverse_pair].append(route_id)
+
+    result = []
+    for stop_pair, routes in stop_pair_to_route.items():
+        if len(routes) == 1:
+            result.append((stop_pair, routes[0]))
+
+    return result
 
 # Function to get merged fare DataFrame
 # No need to change this function
