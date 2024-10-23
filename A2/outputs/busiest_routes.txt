@@ -1,0 +1,6 @@
+Top 5 Busiest Routes (based on trip counts):
+Route ID: 5721, Trip Count: 318
+Route ID: 5722, Trip Count: 318
+Route ID: 674, Trip Count: 313
+Route ID: 593, Trip Count: 311
+Route ID: 5254, Trip Count: 272
