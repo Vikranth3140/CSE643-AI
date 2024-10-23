@@ -117,7 +117,9 @@ def get_most_frequent_stops():
               - stop_id (str): The ID of the stop.
               - trip_count (int): The number of trips for that stop.
     """
-    pass  # Implementation here
+    most_frequent_stops = sorted(stop_trip_count.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    return most_frequent_stops
 
 # Function to find the top 5 busiest stops based on the number of routes passing through them
 def get_top_5_busiest_stops():
