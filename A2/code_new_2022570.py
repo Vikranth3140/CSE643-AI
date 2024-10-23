@@ -192,7 +192,69 @@ def visualize_stop_route_graph_interactive(route_to_stops):
     Returns:
         None
     """
-    pass  # Implementation here
+    G = nx.Graph()
+
+    for route_id, stops in route_to_stops.items():
+        for i in range(len(stops) - 1):
+            G.add_edge(stops[i], stops[i + 1], route=route_id)
+
+    pos = nx.spring_layout(G)
+
+    edge_x = []
+    edge_y = []
+    edge_text = []
+
+    for edge in G.edges(data=True):
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
+        edge_x.append(x0)
+        edge_x.append(x1)
+        edge_x.append(None)
+        edge_y.append(y0)
+        edge_y.append(y1)
+        edge_y.append(None)
+        edge_text.append(f"Route: {edge[2]['route']}")
+
+    node_x = []
+    node_y = []
+    node_text = []
+    for node in G.nodes:
+        x, y = pos[node]
+        node_x.append(x)
+        node_y.append(y)
+        node_text.append(f"Stop ID: {node}")
+
+    edge_trace = go.Scatter(
+        x=edge_x, y=edge_y,
+        line=dict(width=0.5, color='#888'),
+        hoverinfo='text',
+        text=edge_text,
+        mode='lines'
+    )
+
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            size=10,
+            color='#00bfff',
+            line_width=2),
+        text=node_text
+    )
+
+    fig = go.Figure(data=[edge_trace, node_trace],
+                    layout=go.Layout(
+                        title='Stop-Route Graph',
+                        titlefont_size=16,
+                        showlegend=False,
+                        hovermode='closest',
+                        margin=dict(b=0, l=0, r=0, t=40),
+                        xaxis=dict(showgrid=False, zeroline=False),
+                        yaxis=dict(showgrid=False, zeroline=False))
+                    )
+
+    fig.show()
 
 # Brute-Force Approach for finding direct routes
 def direct_route_brute_force(start_stop, end_stop):
