@@ -131,7 +131,17 @@ def get_top_5_busiest_stops():
               - stop_id (str): The ID of the stop.
               - route_count (int): The number of routes passing through that stop.
     """
-    pass  # Implementation here
+    stop_to_routes = defaultdict(set)
+
+    for route_id, stops in route_to_stops.items():
+        for stop_id in stops:
+            stop_to_routes[stop_id].add(route_id)
+
+    stop_route_count = {stop_id: len(routes) for stop_id, routes in stop_to_routes.items()}
+
+    top_5_busiest_stops = sorted(stop_route_count.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    return top_5_busiest_stops
 
 # Function to find pairs of stops with only one direct route between them
 def get_stops_with_one_direct_route():
