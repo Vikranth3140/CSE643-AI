@@ -1,0 +1,6 @@
+Top 5 Stops with the Most Frequent Trips:
+Stop ID: 10225, Trip Count: 4115
+Stop ID: 10221, Trip Count: 4049
+Stop ID: 149, Trip Count: 3998
+Stop ID: 488, Trip Count: 3996
+Stop ID: 233, Trip Count: 3787
