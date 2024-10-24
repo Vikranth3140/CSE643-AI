@@ -268,7 +268,14 @@ def direct_route_brute_force(start_stop, end_stop):
     Returns:
         list: A list of route IDs (str) that connect the two stops directly.
     """
-    pass  # Implementation here
+    direct_routes = []
+
+    for route_id, stops in route_to_stops.items():
+        if start_stop in stops and end_stop in stops:
+            if stops.index(start_stop) < stops.index(end_stop):
+                direct_routes.append(route_id)
+
+    return direct_routes
 
 # Initialize Datalog predicates for reasoning
 pyDatalog.create_terms('RouteHasStop, DirectRoute, OptimalRoute, X, Y, Z, R, R1, R2')  
