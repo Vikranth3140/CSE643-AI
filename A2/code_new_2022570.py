@@ -290,6 +290,7 @@ def initialize_datalog():
     print("Terms initialized: DirectRoute, RouteHasStop, OptimalRoute")  # Confirmation print
 
     # Define Datalog predicates
+    DirectRoute(X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
 
     create_kb()  # Populate the knowledge base
     add_route_data(route_to_stops)  # Add route data to Datalog
@@ -305,7 +306,9 @@ def add_route_data(route_to_stops):
     Returns:
         None
     """
-    pass  # Implementation here
+    for route_id, stops in route_to_stops.items():
+        for stop_id in stops:
+            +RouteHasStop(route_id, stop_id)
 
 # Function to query direct routes between two stops
 def query_direct_routes(start, end):
@@ -319,7 +322,11 @@ def query_direct_routes(start, end):
     Returns:
         list: A sorted list of route IDs (str) connecting the two stops.
     """
-    pass  # Implementation here
+    result = DirectRoute(X, Y) & (X == start) & (Y == end)
+
+    route_ids = [route[R] for route in result]
+
+    return sorted(route_ids)
 
 # Forward chaining for optimal route planning
 def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfers):
