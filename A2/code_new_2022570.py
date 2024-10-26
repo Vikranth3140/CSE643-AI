@@ -344,7 +344,27 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
               - route_id (str): The ID of the route.
               - stop_id (str): The ID of the stop.
     """
-    pass  # Implementation here
+    pyDatalog.clear()  # Clear existing rules if any
+    pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
+
+    # Define a rule that determines if a route can reach another stop (transitive closure)
+    CanReach(X, Y, R) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
+    
+    # Forward chaining process
+    paths = []
+    valid_paths = pyDatalog.ask("CanReach('{}', '{}', R)".format(start_stop_id, stop_id_to_include))
+    
+    if valid_paths is not None:
+        for route1 in valid_paths.answers:
+            # Ensure that there's a way from the via stop to the end stop
+            second_leg = pyDatalog.ask("CanReach('{}', '{}', R)".format(stop_id_to_include, end_stop_id))
+            if second_leg is not None:
+                for route2 in second_leg.answers:
+                    # Check if there’s only one route or if the interchange is limited to max_transfers
+                    if route1 == route2 or max_transfers > 1:
+                        paths.append((route1[0], stop_id_to_include, route2[0]))
+
+    return paths
 
 # Backward chaining for optimal route planning
 def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfers):
@@ -362,7 +382,27 @@ def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transf
               - route_id (str): The ID of the route.
               - stop_id (str): The ID of the stop.
     """
-    pass  # Implementation here
+    pyDatalog.clear()  # Clear existing rules if any
+    pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
+
+    # Define a rule that determines if a route can reach another stop (transitive closure)
+    CanReach(X, Y, R) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
+
+    # Backward chaining process: start from end_stop_id and look for start_stop_id
+    paths = []
+    valid_paths = pyDatalog.ask("CanReach('{}', '{}', R)".format(stop_id_to_include, end_stop_id))
+    
+    if valid_paths is not None:
+        for route1 in valid_paths.answers:
+            # Check if there's a route from the start to the via stop
+            first_leg = pyDatalog.ask("CanReach('{}', '{}', R)".format(start_stop_id, stop_id_to_include))
+            if first_leg is not None:
+                for route2 in first_leg.answers:
+                    # Ensure interchange rules are adhered to
+                    if route1 == route2 or max_transfers > 1:
+                        paths.append((route2[0], stop_id_to_include, route1[0]))
+
+    return paths
 
 # PDDL-style planning for route finding
 def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers):
