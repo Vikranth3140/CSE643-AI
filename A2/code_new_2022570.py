@@ -95,7 +95,7 @@ def get_busiest_routes():
 
     Returns:
         list: A list of tuples, where each tuple contains:
-              - route_id (str): The ID of the route.
+              - route_id (int): The ID of the route.
               - trip_count (int): The number of trips for that route.
     """
     route_trip_count = defaultdict(int)
@@ -114,7 +114,7 @@ def get_most_frequent_stops():
 
     Returns:
         list: A list of tuples, where each tuple contains:
-              - stop_id (str): The ID of the stop.
+              - stop_id (int): The ID of the stop.
               - trip_count (int): The number of trips for that stop.
     """
     most_frequent_stops = sorted(stop_trip_count.items(), key=lambda x: x[1], reverse=True)[:5]
@@ -128,7 +128,7 @@ def get_top_5_busiest_stops():
 
     Returns:
         list: A list of tuples, where each tuple contains:
-              - stop_id (str): The ID of the stop.
+              - stop_id (int): The ID of the stop.
               - route_count (int): The number of routes passing through that stop.
     """
     stop_to_routes = defaultdict(set)
@@ -143,15 +143,16 @@ def get_top_5_busiest_stops():
 
     return top_5_busiest_stops
 
-# Function to find pairs of stops with only one direct route between them
+# Function to identify the top 5 pairs of stops with only one direct route between them
 def get_stops_with_one_direct_route():
     """
-    Identify stop pairs that are connected by exactly one direct route.
+    Identify the top 5 pairs of consecutive stops (start and end) connected by exactly one direct route. 
+    The pairs are sorted by the combined frequency of trips passing through both stops.
 
     Returns:
         list: A list of tuples, where each tuple contains:
-              - pair (tuple): A tuple containing two stop IDs (stop_1, stop_2).
-              - route_id (str): The ID of the route connecting the two stops.
+              - pair (tuple): A tuple with two stop IDs (stop_1, stop_2).
+              - route_id (int): The ID of the route connecting the two stops.
     """
     stop_pair_to_route = defaultdict(list)
 
@@ -262,11 +263,11 @@ def direct_route_brute_force(start_stop, end_stop):
     Find all valid routes between two stops using a brute-force method.
 
     Args:
-        start_stop (str): The ID of the starting stop.
-        end_stop (str): The ID of the ending stop.
+        start_stop (int): The ID of the starting stop.
+        end_stop (int): The ID of the ending stop.
 
     Returns:
-        list: A list of route IDs (str) that connect the two stops directly.
+        list: A list of route IDs (int) that connect the two stops directly.
     """
     direct_routes = []
 
@@ -316,8 +317,8 @@ def query_direct_routes(start, end):
     Query for direct routes between two stops.
 
     Args:
-        start (str): The ID of the starting stop.
-        end (str): The ID of the ending stop.
+        start (int): The ID of the starting stop.
+        end (int): The ID of the ending stop.
 
     Returns:
         list: A sorted list of route IDs (str) connecting the two stops.
@@ -334,15 +335,15 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
     Perform forward chaining to find optimal routes considering transfers.
 
     Args:
-        start_stop_id (str): The starting stop ID.
-        end_stop_id (str): The ending stop ID.
-        stop_id_to_include (str): The stop ID where a transfer occurs.
+        start_stop_id (int): The starting stop ID.
+        end_stop_id (int): The ending stop ID.
+        stop_id_to_include (int): The stop ID where a transfer occurs.
         max_transfers (int): The maximum number of transfers allowed.
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (str): The ID of the route.
-              - stop_id (str): The ID of the stop.
+              - route_id (int): The ID of the route.
+              - stop_id (int): The ID of the stop.
     """
     pyDatalog.clear()  # Clear existing rules if any
     pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
@@ -372,15 +373,15 @@ def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transf
     Perform backward chaining to find optimal routes considering transfers.
 
     Args:
-        start_stop_id (str): The starting stop ID.
-        end_stop_id (str): The ending stop ID.
-        stop_id_to_include (str): The stop ID where a transfer occurs.
+        start_stop_id (int): The starting stop ID.
+        end_stop_id (int): The ending stop ID.
+        stop_id_to_include (int): The stop ID where a transfer occurs.
         max_transfers (int): The maximum number of transfers allowed.
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (str): The ID of the route.
-              - stop_id (str): The ID of the stop.
+              - route_id (int): The ID of the route.
+              - stop_id (int): The ID of the stop.
     """
     pyDatalog.clear()  # Clear existing rules if any
     pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
@@ -410,15 +411,15 @@ def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers)
     Implement PDDL-style planning to find routes with optional transfers.
 
     Args:
-        start_stop_id (str): The starting stop ID.
-        end_stop_id (str): The ending stop ID.
-        stop_id_to_include (str): The stop ID for a transfer.
+        start_stop_id (int): The starting stop ID.
+        end_stop_id (int): The ending stop ID.
+        stop_id_to_include (int): The stop ID for a transfer.
         max_transfers (int): The maximum number of transfers allowed.
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (str): The ID of the route.
-              - stop_id (str): The ID of the stop.
+              - route_id (int): The ID of the route.
+              - stop_id (int): The ID of the stop.
     """
     pass  # Implementation here
 
@@ -447,7 +448,7 @@ def compute_route_summary(pruned_df):
     Returns:
         dict: A summary of routes with the following structure:
               {
-                  route_id (str): {
+                  route_id (int): {
                       'min_price': float,          # The minimum fare for the route
                       'stops': set                # A set of stop IDs for that route
                   }
@@ -461,8 +462,8 @@ def bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_
     Use Breadth-First Search (BFS) to find the optimal route while considering fare constraints.
 
     Args:
-        start_stop_id (str): The starting stop ID.
-        end_stop_id (str): The ending stop ID.
+        start_stop_id (int): The starting stop ID.
+        end_stop_id (int): The ending stop ID.
         initial_fare (float): The available fare for the trip.
         route_summary (dict): A summary of routes with fare and stop information.
         max_transfers (int): The maximum number of transfers allowed (default is 3).
@@ -470,7 +471,7 @@ def bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_
     Returns:
         list: A list representing the optimal route with stops and routes taken, structured as:
               [
-                  (route_id (str), stop_id (str)),  # Tuple for each stop taken in the route
+                  (route_id (int), stop_id (int)),  # Tuple for each stop taken in the route
                   ...
               ]
     """
