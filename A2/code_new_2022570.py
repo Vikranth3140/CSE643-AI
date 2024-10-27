@@ -166,9 +166,14 @@ def get_stops_with_one_direct_route():
     result = []
     for stop_pair, routes in stop_pair_to_route.items():
         if len(routes) == 1:
-            result.append((stop_pair, routes[0]))
+            stop_1, stop_2 = stop_pair
+            combined_trip_count = stop_trip_count[stop_1] + stop_trip_count[stop_2]
+            result.append((stop_pair, routes[0], combined_trip_count))
 
-    return result
+    result_sorted = sorted(result, key=lambda x: x[2], reverse=True)
+
+    top_5_pairs = [(pair, route_id) for pair, route_id, _ in result_sorted[:5]]
+    return top_5_pairs
 
 # Function to get merged fare DataFrame
 # No need to change this function
