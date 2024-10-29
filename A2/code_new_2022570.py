@@ -260,6 +260,10 @@ def visualize_stop_route_graph_interactive(route_to_stops):
                         yaxis=dict(showgrid=False, zeroline=False))
                     )
 
+    # Save as HTML for viewing in a browser
+    fig.write_html("stop_route_graph.html")
+    print("Plot saved as 'stop_route_graph.html'. Open this file in a browser to view the interactive plot.")
+    
     fig.show()
 
 # Brute-Force Approach for finding direct routes
@@ -509,6 +513,11 @@ def basic_verification():
         stops_with_one_direct_route = get_stops_with_one_direct_route()
         print("Function executed without errors.")
 
+        # Verify visualize_stop_route_graph_interactive function
+        print("\n--- Verifying visualize_stop_route_graph_interactive() ---")
+        visualize_stop_route_graph_interactive(route_to_stops)
+        print("Function executed without errors.")
+
         # Verify direct_route_brute_force function
         print("\n--- Verifying direct_route_brute_force() ---")
         start_stop = "101"
@@ -536,11 +545,6 @@ def basic_verification():
         direct_route_query_result = query_direct_routes(start_stop, end_stop)
         print("Functions executed without errors.")
 
-        # Verify visualize_stop_route_graph_interactive function
-        print("\n--- Verifying visualize_stop_route_graph_interactive() ---")
-        visualize_stop_route_graph_interactive(route_to_stops)
-        print("Function executed without errors.")
-
         # Verify prune_data function
         print("\n--- Verifying prune_data() ---")
         initial_fare = 10.0
@@ -562,35 +566,37 @@ def basic_verification():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# # Run the verification
-# basic_verification()
+# Run the verification
+basic_verification()
 
 
 
 
-# Verify Datalog-based Reasoning
-def verify_fol_reasoning():
-    try:
-        # Initialize Datalog Terms and Predicates
-        print("\n--- Verifying initialize_datalog() ---")
-        initialize_datalog()
-        print("Datalog terms and predicates initialized without errors.")
 
-        # Test Adding Route Data to Datalog
-        print("\n--- Verifying add_route_data() ---")
-        add_route_data(route_to_stops)
-        print("Route data added to Datalog without errors.")
 
-        # Test Querying Direct Routes Using Datalog
-        print("\n--- Verifying query_direct_routes() ---")
-        start_stop = "101"
-        end_stop = "105"
-        result = query_direct_routes(start_stop, end_stop)
-        print(f"Direct routes from {start_stop} to {end_stop}: {result}")
-        print("Query executed without errors.")
+# # Verify Datalog-based Reasoning
+# def verify_fol_reasoning():
+#     try:
+#         # Initialize Datalog Terms and Predicates
+#         print("\n--- Verifying initialize_datalog() ---")
+#         initialize_datalog()
+#         print("Datalog terms and predicates initialized without errors.")
 
-    except Exception as e:
-        print(f"An error occurred during FOL Reasoning verification: {e}")
+#         # Test Adding Route Data to Datalog
+#         print("\n--- Verifying add_route_data() ---")
+#         add_route_data(route_to_stops)
+#         print("Route data added to Datalog without errors.")
 
-# Call the verification function
-verify_fol_reasoning()
+#         # Test Querying Direct Routes Using Datalog
+#         print("\n--- Verifying query_direct_routes() ---")
+#         start_stop = "101"
+#         end_stop = "105"
+#         result = query_direct_routes(start_stop, end_stop)
+#         print(f"Direct routes from {start_stop} to {end_stop}: {result}")
+#         print("Query executed without errors.")
+
+#     except Exception as e:
+#         print(f"An error occurred during FOL Reasoning verification: {e}")
+
+# # Call the verification function
+# verify_fol_reasoning()
