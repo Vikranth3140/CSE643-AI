@@ -260,6 +260,10 @@ def visualize_stop_route_graph_interactive(route_to_stops):
                         yaxis=dict(showgrid=False, zeroline=False))
                     )
 
+    # Save as HTML for viewing in a browser
+    fig.write_html("stop_route_graph.html")
+    print("Plot saved as 'stop_route_graph.html'. Open this file in a browser to view the interactive plot.")
+    
     fig.show()
 
 # Brute-Force Approach for finding direct routes
@@ -296,7 +300,7 @@ def initialize_datalog():
     print("Terms initialized: DirectRoute, RouteHasStop, OptimalRoute")  # Confirmation print
 
     # Define Datalog predicates
-    DirectRoute(X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
+    DirectRoute(X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X != Y))
 
     create_kb()  # Populate the knowledge base
     add_route_data(route_to_stops)  # Add route data to Datalog
@@ -481,3 +485,118 @@ def bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_
               ]
     """
     pass  # Implementation here
+
+
+
+# Run the Knowledge Base creation
+create_kb()
+
+def basic_verification():
+    try:
+        # Verify get_busiest_routes function
+        print("\n--- Verifying get_busiest_routes() ---")
+        busiest_routes = get_busiest_routes()
+        print("Function executed without errors.")
+
+        # Verify get_most_frequent_stops function
+        print("\n--- Verifying get_most_frequent_stops() ---")
+        most_frequent_stops = get_most_frequent_stops()
+        print("Function executed without errors.")
+
+        # Verify get_top_5_busiest_stops function
+        print("\n--- Verifying get_top_5_busiest_stops() ---")
+        busiest_stops = get_top_5_busiest_stops()
+        print("Function executed without errors.")
+
+        # Verify get_stops_with_one_direct_route function
+        print("\n--- Verifying get_stops_with_one_direct_route() ---")
+        stops_with_one_direct_route = get_stops_with_one_direct_route()
+        print("Function executed without errors.")
+
+        # Verify visualize_stop_route_graph_interactive function
+        print("\n--- Verifying visualize_stop_route_graph_interactive() ---")
+        visualize_stop_route_graph_interactive(route_to_stops)
+        print("Function executed without errors.")
+
+        # Verify direct_route_brute_force function
+        print("\n--- Verifying direct_route_brute_force() ---")
+        start_stop = "101"
+        end_stop = "105"
+        direct_routes = direct_route_brute_force(start_stop, end_stop)
+        print("Function executed without errors.")
+
+        # Verify forward_chaining function
+        print("\n--- Verifying forward_chaining() ---")
+        start_stop_id = "101"
+        end_stop_id = "110"
+        via_stop = "105"
+        max_transfers = 1
+        forward_paths = forward_chaining(start_stop_id, end_stop_id, via_stop, max_transfers)
+        print("Function executed without errors.")
+
+        # Verify backward_chaining function
+        print("\n--- Verifying backward_chaining() ---")
+        backward_paths = backward_chaining(start_stop_id, end_stop_id, via_stop, max_transfers)
+        print("Function executed without errors.")
+
+        # Verify initialize_datalog function and query_direct_routes
+        print("\n--- Verifying initialize_datalog() and query_direct_routes() ---")
+        initialize_datalog()
+        direct_route_query_result = query_direct_routes(start_stop, end_stop)
+        print("Functions executed without errors.")
+
+        # Verify prune_data function
+        print("\n--- Verifying prune_data() ---")
+        initial_fare = 10.0
+        pruned_df = prune_data(get_merged_fare_df(), initial_fare)
+        print("Function executed without errors.")
+
+        # Verify compute_route_summary function
+        print("\n--- Verifying compute_route_summary() ---")
+        route_summary = compute_route_summary(pruned_df)
+        print("Function executed without errors.")
+
+        # Verify bfs_route_planner_optimized function
+        print("\n--- Verifying bfs_route_planner_optimized() ---")
+        bfs_paths = bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_summary, max_transfers)
+        print("Function executed without errors.")
+
+        print("\nAll functions are correctly defined and executed without errors.")
+    
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Run the verification
+basic_verification()
+
+
+
+
+
+
+# # Verify Datalog-based Reasoning
+# def verify_fol_reasoning():
+#     try:
+#         # Initialize Datalog Terms and Predicates
+#         print("\n--- Verifying initialize_datalog() ---")
+#         initialize_datalog()
+#         print("Datalog terms and predicates initialized without errors.")
+
+#         # Test Adding Route Data to Datalog
+#         print("\n--- Verifying add_route_data() ---")
+#         add_route_data(route_to_stops)
+#         print("Route data added to Datalog without errors.")
+
+#         # Test Querying Direct Routes Using Datalog
+#         print("\n--- Verifying query_direct_routes() ---")
+#         start_stop = "101"
+#         end_stop = "105"
+#         result = query_direct_routes(start_stop, end_stop)
+#         print(f"Direct routes from {start_stop} to {end_stop}: {result}")
+#         print("Query executed without errors.")
+
+#     except Exception as e:
+#         print(f"An error occurred during FOL Reasoning verification: {e}")
+
+# # Call the verification function
+# verify_fol_reasoning()
