@@ -71,9 +71,15 @@ test_inputs = {
     ]
 }
 
+# def check_output(expected, actual):
+#     """Function to compare expected and actual outputs."""
+#     return set(expected) == set(actual)
+
 def check_output(expected, actual):
     """Function to compare expected and actual outputs."""
-    return set(expected) == set(actual)
+    if isinstance(expected, list) and isinstance(actual, list):
+        return sorted(expected) == sorted(actual)  # Ensures order-independent comparison
+    return expected == actual  # For non-list types
 
 def test_direct_route_brute_force():
     for (start_stop, end_stop), expected_output in test_inputs["direct_route"]:
