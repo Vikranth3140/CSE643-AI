@@ -275,11 +275,10 @@ def initialize_datalog():
     pyDatalog.clear()  # Clear previous terms
     print("Terms initialized: DirectRoute, RouteHasStop, OptimalRoute")  # Confirmation print
 
+    add_route_data(route_to_stops)  # Add route data to Datalog
+    
     # Define Datalog predicates
     DirectRoute(R, X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X != Y))
-
-    create_kb()  # Populate the knowledge base
-    add_route_data(route_to_stops)  # Add route data to Datalog
     
 # Adding route data to Datalog
 def add_route_data(route_to_stops):
