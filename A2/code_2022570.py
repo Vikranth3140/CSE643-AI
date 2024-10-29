@@ -42,7 +42,6 @@ def create_kb():
     """
     global route_to_stops, trip_to_route, stop_trip_count, fare_rules, merged_fare_df
 
-    # 1. Convert IDs to strings (e.g., stop_id, trip_id, route_id)
     df_stops['stop_id'] = df_stops['stop_id'].astype(str)
     df_stop_times['trip_id'] = df_stop_times['trip_id'].astype(str)
     df_stop_times['stop_id'] = df_stop_times['stop_id'].astype(str)
@@ -51,42 +50,30 @@ def create_kb():
     df_trips['route_id'] = df_trips['route_id'].astype(str)
     df_fare_rules['fare_id'] = df_fare_rules['fare_id'].astype(str)
     df_fare_rules['route_id'] = df_fare_rules['route_id'].astype(str)
-
-    # 2. Convert time columns (arrival_time, departure_time) in stop_times to datetime
     df_stop_times['arrival_time'] = pd.to_datetime(df_stop_times['arrival_time'], format='%H:%M:%S', errors='coerce')
     df_stop_times['departure_time'] = pd.to_datetime(df_stop_times['departure_time'], format='%H:%M:%S', errors='coerce')
 
-    # Create trip_id to route_id mapping
-    for _, row in df_trips.iterrows():
+    for tmp, row in df_trips.iterrows():
         trip_to_route[row['trip_id']] = row['route_id']
 
-    # Map route_id to a list of stops in order of their sequence
-    stop_sequences = df_stop_times.groupby('trip_id').apply(lambda x: x.sort_values(by='stop_sequence')).reset_index(drop=True)
+    for tmp, row in df_stop_times.iterrows():
+        route_id = trip_to_route.get(row['trip_id'])
+        if route_id:
+            if route_id not in route_to_stops:
+                route_to_stops[route_id] = []
+            route_to_stops[route_id].append((row['stop_sequence'], row['stop_id']))
+            stop_trip_count[row['stop_id']] += 1
 
-    for trip_id, stop_sequence in stop_sequences.groupby('trip_id'):
-        route_id = trip_to_route[trip_id]  # Find route ID from trip_id
-        stops_in_route = stop_sequence['stop_id'].tolist()
-        route_to_stops[route_id].extend(stops_in_route)
-
-    # Ensure each route only has unique stops
     for route_id, stops in route_to_stops.items():
-        route_to_stops[route_id] = list(dict.fromkeys(stops))  # Removes duplicates while preserving order
-    
-    # Count trips per stop
-    for stop_id in df_stop_times['stop_id']:
-        stop_trip_count[stop_id] += 1
+        if all(isinstance(stop, tuple) and len(stop) == 2 for stop in stops):
+            unique_stops = sorted(set(stops), key=lambda x: x[0])
+            route_to_stops[route_id] = [stop_id for _, stop_id in unique_stops]
+        else:
+            print(f"Unexpected structure in stops for route_id {route_id}: {stops}")
 
-    # Create fare rules for routes
-    for _, row in df_fare_rules.iterrows():
-        route_id = row['route_id']
-        fare_rules[route_id] = {
-            'origin_id': row['origin_id'],
-            'destination_id': row['destination_id'],
-            'fare_id': row['fare_id']
-        }
-    
-    # Merge fare rules and attributes into a single DataFrame
-    merged_fare_df = pd.merge(df_fare_rules, df_fare_attributes, on='fare_id', how='left')
+    fare_rules = df_fare_rules.set_index('route_id').T.to_dict()
+
+    merged_fare_df = pd.merge(df_fare_rules, df_fare_attributes, on='fare_id', how='inner')
 
 # Function to find the top 5 busiest routes based on the number of trips
 def get_busiest_routes():
