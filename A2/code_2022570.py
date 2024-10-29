@@ -276,7 +276,7 @@ def initialize_datalog():
     print("Terms initialized: DirectRoute, RouteHasStop, OptimalRoute")  # Confirmation print
 
     # Define Datalog predicates
-    DirectRoute(X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X != Y))
+    DirectRoute(R, X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X != Y))
 
     create_kb()  # Populate the knowledge base
     add_route_data(route_to_stops)  # Add route data to Datalog
@@ -308,9 +308,11 @@ def query_direct_routes(start, end):
     Returns:
         list: A sorted list of route IDs (str) connecting the two stops.
     """
-    result = DirectRoute(X, Y) & (X == start) & (Y == end)
+    query_result = pyDatalog.ask("DirectRoute(R, {}, {})".format(start, end))
+    if query_result is None:
+        return []
 
-    route_ids = [route[R] for route in result]
+    route_ids = [answer[0] for answer in query_result.answers]
 
     return sorted(route_ids)
 
