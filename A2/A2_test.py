@@ -7,7 +7,7 @@ trip_to_route = {}  # Maps trip_id to route_id
 stop_trip_count = defaultdict(int)  # Maps stop_id to count of trips stopping there
 fare_rules = {}  # Maps route_id to fare information
 
-from A2.code_new_2022570 import (
+from A2.code_2022570 import (
     direct_route_brute_force,
     query_direct_routes,
     forward_chaining,
