@@ -42,17 +42,6 @@ def create_kb():
     """
     global route_to_stops, trip_to_route, stop_trip_count, fare_rules, merged_fare_df
 
-    df_stops['stop_id'] = df_stops['stop_id'].astype(str)
-    df_stop_times['trip_id'] = df_stop_times['trip_id'].astype(str)
-    df_stop_times['stop_id'] = df_stop_times['stop_id'].astype(str)
-    df_routes['route_id'] = df_routes['route_id'].astype(str)
-    df_trips['trip_id'] = df_trips['trip_id'].astype(str)
-    df_trips['route_id'] = df_trips['route_id'].astype(str)
-    df_fare_rules['fare_id'] = df_fare_rules['fare_id'].astype(str)
-    df_fare_rules['route_id'] = df_fare_rules['route_id'].astype(str)
-    df_stop_times['arrival_time'] = pd.to_datetime(df_stop_times['arrival_time'], format='%H:%M:%S', errors='coerce')
-    df_stop_times['departure_time'] = pd.to_datetime(df_stop_times['departure_time'], format='%H:%M:%S', errors='coerce')
-
     for tmp, row in df_trips.iterrows():
         trip_to_route[row['trip_id']] = row['route_id']
 
