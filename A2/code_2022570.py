@@ -42,17 +42,22 @@ def create_kb():
     """
     global route_to_stops, trip_to_route, stop_trip_count, fare_rules, merged_fare_df
 
+    # Create trip_id to route_id mapping
     for tmp, row in df_trips.iterrows():
         trip_to_route[row['trip_id']] = row['route_id']
 
+    # Map route_id to a list of stops in order of their sequence
     for tmp, row in df_stop_times.iterrows():
         route_id = trip_to_route.get(row['trip_id'])
         if route_id:
             if route_id not in route_to_stops:
                 route_to_stops[route_id] = []
             route_to_stops[route_id].append((row['stop_sequence'], row['stop_id']))
+            
+            # Count trips per stop
             stop_trip_count[row['stop_id']] += 1
 
+    # Ensure each route only has unique stops
     for route_id, stops in route_to_stops.items():
         if all(isinstance(stop, tuple) and len(stop) == 2 for stop in stops):
             unique_stops = sorted(set(stops), key=lambda x: x[0])
@@ -60,8 +65,10 @@ def create_kb():
         else:
             print(f"Unexpected structure in stops for route_id {route_id}: {stops}")
 
+    # Create fare rules for routes
     fare_rules = df_fare_rules.set_index('route_id').T.to_dict()
 
+    # Merge fare rules and attributes into a single DataFrame
     merged_fare_df = pd.merge(df_fare_rules, df_fare_attributes, on='fare_id', how='inner')
 
 # Function to find the top 5 busiest routes based on the number of trips
@@ -275,10 +282,11 @@ def initialize_datalog():
     pyDatalog.clear()  # Clear previous terms
     print("Terms initialized: DirectRoute, RouteHasStop, OptimalRoute")  # Confirmation print
 
-    add_route_data(route_to_stops)  # Add route data to Datalog
-    
     # Define Datalog predicates
     DirectRoute(R, X, Y) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X != Y))
+
+    create_kb()  # Populate the knowledge base
+    add_route_data(route_to_stops)  # Add route data to Datalog
     
 # Adding route data to Datalog
 def add_route_data(route_to_stops):
@@ -328,8 +336,9 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (int): The ID of the route.
-              - stop_id (int): The ID of the stop.
+              - route_id1 (int): The ID of the first route.
+              - stop_id (int): The ID of the intermediate stop.
+              - route_id2 (int): The ID of the second route.
     """
     pyDatalog.clear()  # Clear existing rules if any
     pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
@@ -366,8 +375,9 @@ def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transf
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (int): The ID of the route.
-              - stop_id (int): The ID of the stop.
+              - route_id1 (int): The ID of the first route.
+              - stop_id (int): The ID of the intermediate stop.
+              - route_id2 (int): The ID of the second route.
     """
     pyDatalog.clear()  # Clear existing rules if any
     pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
@@ -404,8 +414,9 @@ def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers)
 
     Returns:
         list: A list of unique paths (list of tuples) that satisfy the criteria, where each tuple contains:
-              - route_id (int): The ID of the route.
-              - stop_id (int): The ID of the stop.
+              - route_id1 (int): The ID of the first route.
+              - stop_id (int): The ID of the intermediate stop.
+              - route_id2 (int): The ID of the second route.
     """
     pass  # Implementation here
 
