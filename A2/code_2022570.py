@@ -50,14 +50,17 @@ def create_kb():
     for tmp, row in df_stop_times.iterrows():
         route_id = trip_to_route.get(row['trip_id'])
         if route_id:
-            # Only add (sequence, stop_id) if it doesn't already exist for the route
+            if route_id not in route_to_stops:
+                route_to_stops[route_id] = []
             route_to_stops[route_id].append((row['stop_sequence'], row['stop_id']))
+            
             # Count trips per stop
             stop_trip_count[row['stop_id']] += 1
 
     # Process each route to retain only unique stop IDs in order
     for route_id, stops in route_to_stops.items():
         # Filter and sort based on sequence, then extract stop_ids
+        stops = [stop for stop in stops if isinstance(stop, tuple) and len(stop) == 2]
         unique_stops = sorted(set(stops), key=lambda x: x[0])
         route_to_stops[route_id] = [stop_id for _, stop_id in unique_stops]
 
@@ -133,26 +136,15 @@ def get_stops_with_one_direct_route():
               - pair (tuple): A tuple with two stop IDs (stop_1, stop_2).
               - route_id (int): The ID of the route connecting the two stops.
     """
-    stop_pair_to_route = defaultdict(list)
+    stop_pairs = defaultdict(lambda: defaultdict(int))
 
     for route_id, stops in route_to_stops.items():
         for i in range(len(stops) - 1):
-            stop_pair = (stops[i], stops[i + 1])
-            reverse_pair = (stops[i + 1], stops[i])
-            stop_pair_to_route[stop_pair].append(route_id)
-            stop_pair_to_route[reverse_pair].append(route_id)
-
-    result = []
-    for stop_pair, routes in stop_pair_to_route.items():
-        if len(routes) == 1:
-            stop_1, stop_2 = stop_pair
-            combined_trip_count = stop_trip_count[stop_1] + stop_trip_count[stop_2]
-            result.append((stop_pair, routes[0], combined_trip_count))
-
-    result_sorted = sorted(result, key=lambda x: x[2], reverse=True)
-
-    top_5_pairs = [(pair, route_id) for pair, route_id, _ in result_sorted[:5]]
-    return top_5_pairs
+            pair = (stops[i], stops[i + 1])
+            stop_pairs[pair][route_id] += 1
+    single_route_pairs = [(pair, route_id) for pair, routes in stop_pairs.items() if len(routes) == 1 for route_id in routes]
+    sorted_pairs = sorted(single_route_pairs, key=lambda x: stop_trip_count[x[0][0]] + stop_trip_count[x[0][1]], reverse=True)[:5]
+    return sorted_pairs
 
 # Function to get merged fare DataFrame
 # No need to change this function
@@ -261,8 +253,7 @@ def direct_route_brute_force(start_stop, end_stop):
 
     for route_id, stops in route_to_stops.items():
         if start_stop in stops and end_stop in stops:
-            if stops.index(start_stop) < stops.index(end_stop):
-                direct_routes.append(route_id)
+            direct_routes.append(route_id)
 
     return direct_routes
 
