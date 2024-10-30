@@ -1,6 +1,6 @@
-Top 5 Busiest Stops (based on number of routes passing through):
-Stop ID: 488, Number of Routes: 102
-Stop ID: 10225, Number of Routes: 101
-Stop ID: 149, Number of Routes: 99
-Stop ID: 233, Number of Routes: 95
-Stop ID: 10221, Number of Routes: 86
+Top 5 Busiest Stops:
+Stop ID: 488, Route Count: 102
+Stop ID: 10225, Route Count: 101
+Stop ID: 149, Route Count: 99
+Stop ID: 233, Route Count: 95
+Stop ID: 10221, Route Count: 86

@@ -50,20 +50,16 @@ def create_kb():
     for tmp, row in df_stop_times.iterrows():
         route_id = trip_to_route.get(row['trip_id'])
         if route_id:
-            if route_id not in route_to_stops:
-                route_to_stops[route_id] = []
+            # Only add (sequence, stop_id) if it doesn't already exist for the route
             route_to_stops[route_id].append((row['stop_sequence'], row['stop_id']))
-            
             # Count trips per stop
             stop_trip_count[row['stop_id']] += 1
 
-    # Ensure each route only has unique stops
+    # Process each route to retain only unique stop IDs in order
     for route_id, stops in route_to_stops.items():
-        if all(isinstance(stop, tuple) and len(stop) == 2 for stop in stops):
-            unique_stops = sorted(set(stops), key=lambda x: x[0])
-            route_to_stops[route_id] = [stop_id for _, stop_id in unique_stops]
-        else:
-            print(f"Unexpected structure in stops for route_id {route_id}: {stops}")
+        # Filter and sort based on sequence, then extract stop_ids
+        unique_stops = sorted(set(stops), key=lambda x: x[0])
+        route_to_stops[route_id] = [stop_id for _, stop_id in unique_stops]
 
     # Create fare rules for routes
     fare_rules = df_fare_rules.set_index('route_id').T.to_dict()
