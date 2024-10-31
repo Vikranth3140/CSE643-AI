@@ -57,9 +57,8 @@ def create_kb():
             # Count trips per stop
             stop_trip_count[row['stop_id']] += 1
 
-    # Process each route to retain only unique stop IDs in order
+    # Ensure each route only has unique stops
     for route_id, stops in route_to_stops.items():
-        # Filter and sort based on sequence, then extract stop_ids
         stops = [stop for stop in stops if isinstance(stop, tuple) and len(stop) == 2]
         unique_stops = sorted(set(stops), key=lambda x: x[0])
         route_to_stops[route_id] = [stop_id for _, stop_id in unique_stops]
