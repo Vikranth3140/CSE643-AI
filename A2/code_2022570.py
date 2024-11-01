@@ -359,25 +359,20 @@ def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transf
               - stop_id (int): The ID of the intermediate stop.
               - route_id2 (int): The ID of the second route.
     """
-    pyDatalog.clear()  # Clear existing rules if any
-    pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
-
-    # Define a rule that determines if a route can reach another stop (transitive closure)
-    CanReach(X, Y, R) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
-
-    # Backward chaining process: start from end_stop_id and look for start_stop_id
     paths = []
-    valid_paths = pyDatalog.ask("CanReach('{}', '{}', R)".format(stop_id_to_include, end_stop_id))
-    
+
+    # Define OptimalRoute for backward chaining using DirectRoute with end, intermediate (transfer), and start stops
+    OptimalRoute(R1, R2, stop_id_to_include) <= (
+        DirectRoute(R1, end_stop_id, stop_id_to_include) & 
+        DirectRoute(R2, stop_id_to_include, start_stop_id)
+    )
+
+    valid_paths = pyDatalog.ask(f"OptimalRoute(R1, R2, {stop_id_to_include})")
+
     if valid_paths is not None:
-        for route1 in valid_paths.answers:
-            # Check if there's a route from the start to the via stop
-            first_leg = pyDatalog.ask("CanReach('{}', '{}', R)".format(start_stop_id, stop_id_to_include))
-            if first_leg is not None:
-                for route2 in first_leg.answers:
-                    # Ensure interchange rules are adhered to
-                    if route1 == route2 or max_transfers > 1:
-                        paths.append((route2[0], stop_id_to_include, route1[0]))
+        for answer in valid_paths.answers:
+            route1, route2 = answer[0], answer[1]
+            paths.append((route1, stop_id_to_include, route2))
 
     return paths
 
