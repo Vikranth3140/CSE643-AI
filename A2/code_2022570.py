@@ -326,25 +326,18 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
               - stop_id (int): The ID of the intermediate stop.
               - route_id2 (int): The ID of the second route.
     """
-    pyDatalog.clear()  # Clear existing rules if any
-    pyDatalog.create_terms('CanReach, RouteHasStop, ViaStop, Path, X, Y, Z, R, R1, R2, Stops')
-
-    # Define a rule that determines if a route can reach another stop (transitive closure)
-    CanReach(X, Y, R) <= (RouteHasStop(R, X) & RouteHasStop(R, Y) & (X._index < Y._index))
-    
-    # Forward chaining process
     paths = []
-    valid_paths = pyDatalog.ask("CanReach('{}', '{}', R)".format(start_stop_id, stop_id_to_include))
+    direct_routes_to_transfer = DirectRoute(R1, start_stop_id, stop_id_to_include)
+    direct_routes_from_transfer = DirectRoute(R2, stop_id_to_include, end_stop_id)
     
-    if valid_paths is not None:
-        for route1 in valid_paths.answers:
-            # Ensure that there's a way from the via stop to the end stop
-            second_leg = pyDatalog.ask("CanReach('{}', '{}', R)".format(stop_id_to_include, end_stop_id))
-            if second_leg is not None:
-                for route2 in second_leg.answers:
-                    # Check if there’s only one route or if the interchange is limited to max_transfers
-                    if route1 == route2 or max_transfers > 1:
-                        paths.append((route1[0], stop_id_to_include, route2[0]))
+    print("Direct routes to transfer stop:", direct_routes_to_transfer)
+    print("Direct routes from transfer stop:", direct_routes_from_transfer)
+
+    routes_to_transfer = [route[0] for route in direct_routes_to_transfer]  
+    routes_from_transfer = [route[0] for route in direct_routes_from_transfer] 
+    for route_to_transfer in routes_to_transfer:
+        for route_from_transfer in routes_from_transfer:
+            paths.append((route_to_transfer, stop_id_to_include, route_from_transfer))
 
     return paths
 
