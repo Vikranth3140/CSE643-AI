@@ -16,20 +16,22 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
               - stop_id (int): The ID of the intermediate stop.
               - route_id2 (int): The ID of the second route.
     """
-    # pass  # Implementation here
     paths = []
-    direct_routes_to_transfer = DirectRoute(R1, start_stop_id, stop_id_to_include)
-    direct_routes_from_transfer = DirectRoute(R2, stop_id_to_include, end_stop_id)
-    
-    print("Direct routes to transfer stop:", direct_routes_to_transfer)
-    print("Direct routes from transfer stop:", direct_routes_from_transfer)
 
-    routes_to_transfer = [route[0] for route in direct_routes_to_transfer]  
-    routes_from_transfer = [route[0] for route in direct_routes_from_transfer] 
-    for route_to_transfer in routes_to_transfer:
-        for route_from_transfer in routes_from_transfer:
-            # Append as (route_id1, stop_id_to_include, route_id2)
-            paths.append((route_to_transfer, stop_id_to_include, route_from_transfer))
+    # Define OptimalRoute using DirectRoute with start, intermediate (transfer), and end stops
+    OptimalRoute(R1, R2, stop_id_to_include) <= (
+        DirectRoute(R1, start_stop_id, stop_id_to_include) & 
+        DirectRoute(R2, stop_id_to_include, end_stop_id)
+    )
+
+    # Query for optimal routes that satisfy the transfer condition
+    valid_paths = pyDatalog.ask(f"OptimalRoute(R1, R2, {stop_id_to_include})")
+
+    # Process the results if valid paths are found
+    if valid_paths is not None:
+        for answer in valid_paths.answers:
+            route1, route2 = answer[0], answer[1]
+            paths.append((route1, stop_id_to_include, route2))
 
     return paths
 
@@ -44,6 +46,13 @@ test_inputs = {
                               (121, 300, 712)])
     ]
 }
+
+def check_output(expected, actual):
+    """Function to compare expected and actual outputs."""
+    if isinstance(expected, list) and isinstance(actual, list):
+        return sorted(expected) == sorted(actual)  # Ensures order-independent comparison
+    return expected == actual  # For non-list types
+
 def test_forward_chaining():
     for (start_stop, end_stop, via_stop, max_transfers), expected_output in test_inputs["forward_chaining"]:
         actual_output = forward_chaining(start_stop, end_stop, via_stop, max_transfers)
