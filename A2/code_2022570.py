@@ -403,43 +403,25 @@ def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers)
               - stop_id (int): The ID of the intermediate stop.
               - route_id2 (int): The ID of the second route.
     """
+    paths = []
 
-    # Facts for the starting and ending stop
-    +start(start_stop_id)
-    +end(end_stop_id)
-    +transfer(stop_id_to_include)
-    +max_transfers(max_transfers)
+    direct_routes_to_transfer = DirectRoute(R1, start_stop_id, stop_id_to_include)
+    direct_routes_from_transfer = DirectRoute(R2, stop_id_to_include, end_stop_id)
 
-    # Sample data: Routes and stops (these would normally come from data or be parameters)
-    # Each route is represented as route_stops(route_id, stop_list)
-    +route_stops(1, [1, 2, 3, 4])
-    +route_stops(2, [3, 5, 6])
-    +route_stops(3, [6, 7, 8])
-    # Define a mapping for routes and stops for simplicity in the logic
+    print("Direct routes to transfer stop:", direct_routes_to_transfer)
+    print("Direct routes from transfer stop:", direct_routes_from_transfer)
 
-    # Board Action
-    # Define the rule for boarding a route from a given stop to reach a destination on that route
-    board(Route, Stop) <= route_stops(Route, Stops) & (Stop._in(Stops))
+    for route_to_transfer in direct_routes_to_transfer:
+        for route_from_transfer in direct_routes_from_transfer:
+            paths.append((route_to_transfer[0], stop_id_to_include, route_from_transfer[0]))
+            print(f"Action: Board route {route_to_transfer[0]} at stop {start_stop_id}")
+            print(f"Action: Transfer from route {route_to_transfer[0]} to route {route_from_transfer[0]} at stop {stop_id_to_include}")
+            print(f"Current State: Goal reached at Stop {end_stop_id}")
 
-    # Transfer Action
-    # Allows transferring from route R1 to route R2 at a common stop
-    transfer_route(Route1, Route2, TransferStop) <= (route_stops(Route1, Stops1) &
-                                                     route_stops(Route2, Stops2) &
-                                                     (TransferStop._in(Stops1)) & 
-                                                     (TransferStop._in(Stops2)))
-
-    # Define reachable state for stops
-    can_reach(Start, End, 0) <= start(Start) & end(End) & board(Route, Start)
-
-    # Rule for transferring and updating the transfer count
-    can_reach(Start, End, Transfers+1) <= (transfer_route(Route1, Route2, TransferStop) &
-                                           can_reach(Start, TransferStop, Transfers) &
-                                           (Transfers < max_transfers))
-    
-    # Query to find paths that satisfy the criteria
-    result = can_reach(start_stop_id, end_stop_id, Transfers)
-    paths = list(result)  # Convert results to list for readable output
-    return paths
+    if paths:
+        return paths
+    else:
+        return []
 
 # Function to filter fare data based on an initial fare limit
 def prune_data(merged_fare_df, initial_fare):
