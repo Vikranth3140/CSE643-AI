@@ -335,12 +335,15 @@ def forward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfe
 
     valid_paths = pyDatalog.ask(f"OptimalRoute(R1, R2, {stop_id_to_include})")
 
-    if valid_paths is not None:
+    if valid_paths:
         for answer in valid_paths.answers:
             route1, route2 = answer[0], answer[1]
             paths.append((route1, stop_id_to_include, route2))
 
-    return paths
+    if paths:
+        return paths
+    else:
+        return []
 
 # Backward chaining for optimal route planning
 def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transfers):
@@ -361,21 +364,27 @@ def backward_chaining(start_stop_id, end_stop_id, stop_id_to_include, max_transf
     """
     paths = []
 
-    # Define OptimalRoute for backward chaining using DirectRoute with end, intermediate (transfer), and start stops
-    OptimalRoute(R1, R2, stop_id_to_include) <= (
-        DirectRoute(R1, end_stop_id, stop_id_to_include) & 
-        DirectRoute(R2, stop_id_to_include, start_stop_id)
+    OptimalRoute(X, Y, Z) <= (
+        DirectRoute(X, start_stop_id, Z) & 
+        DirectRoute(Y, Z, end_stop_id)
     )
 
-    valid_paths = pyDatalog.ask(f"OptimalRoute(R1, R2, {stop_id_to_include})")
+    valid_paths = OptimalRoute(X, Y, stop_id_to_include)
 
-    if valid_paths is not None:
-        for answer in valid_paths.answers:
-            route1, route2 = answer[0], answer[1]
-            if route1 < route2:
-                paths.append((route1, stop_id_to_include, route2))
+    paths.append((valid_paths[0][1], stop_id_to_include, valid_paths[0][0]))
 
-    return paths
+    for tmp in range(1, len(valid_paths)):
+        route1, route2 = valid_paths[tmp][0], valid_paths[tmp][1]
+
+        if route1 == route2:
+            continue
+        else:
+            paths.append((route2, stop_id_to_include, route1))
+
+    if paths:
+        return paths
+    else:
+        return []
 
 # PDDL-style planning for route finding
 def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers):
