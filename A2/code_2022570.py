@@ -403,20 +403,21 @@ def pddl_planning(start_stop_id, end_stop_id, stop_id_to_include, max_transfers)
               - stop_id (int): The ID of the intermediate stop.
               - route_id2 (int): The ID of the second route.
     """
+    Action('board_route', R, X) <= RouteHasStop(R, X)
+    Action('transfer_route', R1, R2, Z) <= (
+        DirectRoute(R1, start_stop_id, Z) & 
+        DirectRoute(R2, Z, end_stop_id)
+    )
+
+    result = Action('board_route', X, start_stop_id) & \
+             Action('transfer_route', X, Y, stop_id_to_include) & \
+             Action('board_route', Y, end_stop_id)
+
     paths = []
-
-    direct_routes_to_transfer = DirectRoute(R1, start_stop_id, stop_id_to_include)
-    direct_routes_from_transfer = DirectRoute(R2, stop_id_to_include, end_stop_id)
-
-    print("Direct routes to transfer stop:", direct_routes_to_transfer)
-    print("Direct routes from transfer stop:", direct_routes_from_transfer)
-
-    for route_to_transfer in direct_routes_to_transfer:
-        for route_from_transfer in direct_routes_from_transfer:
-            paths.append((route_to_transfer[0], stop_id_to_include, route_from_transfer[0]))
-            print(f"Action: Board route {route_to_transfer[0]} at stop {start_stop_id}")
-            print(f"Action: Transfer from route {route_to_transfer[0]} to route {route_from_transfer[0]} at stop {stop_id_to_include}")
-            print(f"Current State: Goal reached at Stop {end_stop_id}")
+    
+    for action_set in result:
+        route1, route2 = action_set[0], action_set[1]
+        paths.append((route1, stop_id_to_include, route2))
 
     if paths:
         return paths
@@ -435,7 +436,8 @@ def prune_data(merged_fare_df, initial_fare):
     Returns:
         DataFrame: A filtered DataFrame containing only routes within the fare limit.
     """
-    pass  # Implementation here
+    pruned_df = merged_fare_df[merged_fare_df['price'] <= initial_fare]
+    return pruned_df
 
 # Pre-computation of Route Summary
 def compute_route_summary(pruned_df):
@@ -454,7 +456,18 @@ def compute_route_summary(pruned_df):
                   }
               }
     """
-    pass  # Implementation here
+    route_summary = {}
+
+    for route_id, group in pruned_df.groupby('route_id'):
+        min_price = group['price'].min()
+        stops = set(group['origin_id']).union(set(group['destination_id']))
+        
+        route_summary[route_id] = {
+            'min_price': min_price,
+            'stops': stops
+        }
+
+    return route_summary
 
 # BFS for optimized route planning
 def bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_summary, max_transfers=3):
@@ -475,4 +488,28 @@ def bfs_route_planner_optimized(start_stop_id, end_stop_id, initial_fare, route_
                   ...
               ]
     """
-    pass  # Implementation here
+    queue = deque([(start_stop_id, initial_fare, [], 0)])
+    visited = set()
+    
+    while queue:
+        current_stop, remaining_fare, path, transfers = queue.popleft()
+
+        if current_stop == end_stop_id:
+            return path
+
+        if transfers > max_transfers:
+            continue
+
+        for route_id, route_info in route_summary.items():
+            if current_stop in route_info['stops'] and route_info['min_price'] <= remaining_fare:
+                for stop in route_info['stops']:
+                    if stop != current_stop:
+                        new_path = path + [(route_id, stop)]
+                        new_fare = remaining_fare - route_info['min_price']
+                        new_transfers = transfers + 1 if route_id not in [r[0] for r in path] else transfers
+
+                        if (stop, new_fare) not in visited:
+                            visited.add((stop, new_fare))
+                            queue.append((stop, new_fare, new_path, new_transfers))
+
+    return []
