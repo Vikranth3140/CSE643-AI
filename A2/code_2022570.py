@@ -257,7 +257,7 @@ def direct_route_brute_force(start_stop, end_stop):
     return direct_routes
 
 # Initialize Datalog predicates for reasoning
-pyDatalog.create_terms('RouteHasStop, DirectRoute, OptimalRoute, X, Y, Z, R, R1, R2')  
+pyDatalog.create_terms('RouteHasStop, DirectRoute, OptimalRoute, Action, X, Y, Z, R, R1, R2')  
 def initialize_datalog():
     """
     Initialize Datalog terms and predicates for reasoning about routes and stops.
