@@ -16,7 +16,10 @@ def load_data():
     """Load train and validation datasets from CSV files."""
     # Implement code to load CSV files into DataFrames
     # Example: train_data = pd.read_csv("train_data.csv")
-    pass
+    train_data = pd.read_csv("train_data.csv")
+    val_data = pd.read_csv("validation_data.csv")
+    print("Data loaded successfully.")
+    return train_data, val_data
 
 def make_network(df):
     """Define and fit the initial Bayesian Network."""
