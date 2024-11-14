@@ -24,7 +24,19 @@ def load_data():
 def make_network(df):
     """Define and fit the initial Bayesian Network."""
     # Code to define the DAG, create and fit Bayesian Network, and return the model
-    pass
+    DAG_edges = [
+        ('Distance', 'Zones_Crossed'),
+        ('Distance', 'Fare_Category'),
+        ('Zones_Crossed', 'Fare_Category'),
+        ('Route_Type', 'Fare_Category')
+    ]
+    
+    model = bn.make_DAG(DAG_edges)
+    
+    model = bn.parameter_learning.fit(model, df)
+    print("Initial Bayesian Network created and fitted successfully.")
+    
+    return model
 
 def make_pruned_network(df):
     """Define and fit a pruned Bayesian Network."""
