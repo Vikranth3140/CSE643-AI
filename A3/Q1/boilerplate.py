@@ -47,7 +47,9 @@ def make_pruned_network(df):
         ('Distance', 'Zones_Crossed'),
         ('Distance', 'Fare_Category'),
         ('Zones_Crossed', 'Fare_Category'),
-        ('Route_Type', 'Fare_Category')
+        ('Route_Type', 'Fare_Category'),
+        ('Route_Type', 'Zones_Crossed'),
+        ('Route_Type', 'Distance')
     ]
     
     model = bn.make_DAG(DAG_edges)
@@ -79,7 +81,25 @@ def make_pruned_network(df):
 def make_optimized_network(df):
     """Perform structure optimization and fit the optimized Bayesian Network."""
     # Code to optimize the structure, fit it, and return the optimized model
-    pass
+    DAG_edges = [
+        ('Distance', 'Zones_Crossed'),
+        ('Distance', 'Fare_Category'),
+        ('Zones_Crossed', 'Fare_Category'),
+        ('Route_Type', 'Fare_Category'),
+        ('Route_Type', 'Zones_Crossed'),
+        ('Route_Type', 'Distance')
+    ]
+    
+    initial_model = bn.make_DAG(DAG_edges)
+    initial_model = bn.parameter_learning.fit(initial_model, df)
+    
+    optimized_model = bn.structure_learning.fit(df, methodtype='hc', scoretype='bic')
+
+    optimized_score = bn.structure_scores(optimized_model, df)
+    print(f"Optimized model structure score (BIC): {optimized_score['bic']}")
+
+    print("Optimized Bayesian Network created and fitted successfully.")
+    return optimized_model
 
 def save_model(fname, model):
     """Save the model to a file using pickle."""
