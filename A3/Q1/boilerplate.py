@@ -41,7 +41,38 @@ def make_network(df):
 def make_pruned_network(df):
     """Define and fit a pruned Bayesian Network."""
     # Code to create a pruned network, fit it, and return the pruned model
-    pass
+    DAG_edges = [
+        ('Distance', 'Zones_Crossed'),
+        ('Distance', 'Fare_Category'),
+        ('Zones_Crossed', 'Fare_Category'),
+        ('Route_Type', 'Fare_Category')
+    ]
+    
+    model = bn.make_DAG(DAG_edges)
+    model = bn.parameter_learning.fit(model, df)
+    
+    initial_score = bn.structure_scores(model, df)
+    print(f"Initial model structure score (BIC): {initial_score['bic']}")
+    
+    best_score = initial_score['bic']
+    best_model = model
+
+    for edge in DAG_edges:
+        pruned_edges = [e for e in DAG_edges if e != edge]
+        
+        pruned_model = bn.make_DAG(pruned_edges)
+        pruned_model = bn.parameter_learning.fit(pruned_model, df)
+        
+        pruned_score = bn.structure_scores(pruned_model, df)
+        print(f"Score after pruning {edge}: {pruned_score['bic']}")
+
+        if pruned_score['bic'] > best_score:
+            best_score = pruned_score['bic']
+            best_model = pruned_model
+            print(f"Improved model found by removing {edge} with score {best_score}")
+    
+    print("Pruned Bayesian Network created and fitted successfully.")
+    return best_model
 
 def make_optimized_network(df):
     """Perform structure optimization and fit the optimized Bayesian Network."""
