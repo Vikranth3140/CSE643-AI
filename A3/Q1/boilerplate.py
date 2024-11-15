@@ -25,18 +25,29 @@ def make_network(df):
     """Define and fit the initial Bayesian Network."""
     # Code to define the DAG, create and fit Bayesian Network, and return the model
     DAG_edges = [
+        ('Start_Stop_ID', 'Distance'),
+        ('Start_Stop_ID', 'Zones_Crossed'),
+        ('Start_Stop_ID', 'Route_Type'),
+        ('Start_Stop_ID', 'Fare_Category'),
+        ('Start_Stop_ID', 'End_Stop_ID'),
         ('Distance', 'Zones_Crossed'),
         ('Distance', 'Fare_Category'),
         ('Distance', 'Route_Type'),
         ('Zones_Crossed', 'Fare_Category'),
         ('Zones_Crossed', 'Route_Type'),
-        ('Fare_Category', 'Route_Type')
+        ('Fare_Category', 'Route_Type'),
+        ('Distance', 'End_Stop_ID'),
+        ('Zones_Crossed', 'End_Stop_ID'),
+        ('Route_Type', 'End_Stop_ID'),
+        ('Fare_Category', 'End_Stop_ID')
     ]
     
     model = bn.make_DAG(DAG_edges)
     
     model = bn.parameter_learning.fit(model, df)
     print("Initial Bayesian Network created and fitted successfully.")
+    
+    bn.plot(model, params_static={"layout": "spring", "title": "Initial Bayesian Network"})
     
     return model
 
