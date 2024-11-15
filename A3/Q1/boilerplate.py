@@ -99,10 +99,6 @@ def make_pruned_network(df):
     print("Pruned Bayesian Network created and fitted successfully.")
     
     bn.plot(best_model, params_static={"layout": "spring", "title": "Pruned Bayesian Network"})
-
-    output_filename = "pruned_network_plot.png"
-    bn.save(best_model, params_static={"filename": output_filename})
-    print(f"Pruned Bayesian Network plot saved as {output_filename}")
     
     return best_model
 
