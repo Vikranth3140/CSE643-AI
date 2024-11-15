@@ -27,10 +27,10 @@ def make_network(df):
     DAG_edges = [
         ('Distance', 'Zones_Crossed'),
         ('Distance', 'Fare_Category'),
+        ('Distance', 'Route_Type'),
         ('Zones_Crossed', 'Fare_Category'),
-        ('Route_Type', 'Fare_Category'),
-        ('Route_Type', 'Zones_Crossed'),
-        ('Route_Type', 'Distance')
+        ('Zones_Crossed', 'Route_Type'),
+        ('Fare_Category', 'Route_Type')
     ]
     
     model = bn.make_DAG(DAG_edges)
