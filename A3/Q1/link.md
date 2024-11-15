@@ -1,0 +1,1 @@
+https://chatgpt.com/g/g-FHouf1Xs2-python-and-ai-learning-assistant/c/67358aa3-4470-8009-b197-64841a765759
