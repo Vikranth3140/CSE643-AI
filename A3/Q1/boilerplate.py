@@ -55,15 +55,25 @@ def make_pruned_network(df):
     """Define and fit a pruned Bayesian Network."""
     # Code to create a pruned network, fit it, and return the pruned model
     DAG_edges = [
+        ('Start_Stop_ID', 'Distance'),
+        ('Start_Stop_ID', 'Zones_Crossed'),
+        ('Start_Stop_ID', 'Route_Type'),
+        ('Start_Stop_ID', 'Fare_Category'),
+        ('Start_Stop_ID', 'End_Stop_ID'),
         ('Distance', 'Zones_Crossed'),
         ('Distance', 'Fare_Category'),
+        ('Distance', 'Route_Type'),
         ('Zones_Crossed', 'Fare_Category'),
-        ('Route_Type', 'Fare_Category'),
-        ('Route_Type', 'Zones_Crossed'),
-        ('Route_Type', 'Distance')
+        ('Zones_Crossed', 'Route_Type'),
+        ('Fare_Category', 'Route_Type'),
+        ('Distance', 'End_Stop_ID'),
+        ('Zones_Crossed', 'End_Stop_ID'),
+        ('Route_Type', 'End_Stop_ID'),
+        ('Fare_Category', 'End_Stop_ID')
     ]
     
     model = bn.make_DAG(DAG_edges)
+    
     model = bn.parameter_learning.fit(model, df)
     
     initial_score = bn.structure_scores(model, df)
@@ -87,6 +97,13 @@ def make_pruned_network(df):
             print(f"Improved model found by removing {edge} with score {best_score}")
     
     print("Pruned Bayesian Network created and fitted successfully.")
+    
+    bn.plot(best_model, params_static={"layout": "spring", "title": "Pruned Bayesian Network"})
+
+    output_filename = "pruned_network_plot.png"
+    bn.save(best_model, params_static={"filename": output_filename})
+    print(f"Pruned Bayesian Network plot saved as {output_filename}")
+    
     return best_model
 
 def make_optimized_network(df):
