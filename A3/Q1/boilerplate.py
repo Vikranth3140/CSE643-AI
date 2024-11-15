@@ -25,21 +25,13 @@ def make_network(df):
     """Define and fit the initial Bayesian Network."""
     # Code to define the DAG, create and fit Bayesian Network, and return the model
     DAG_edges = [
-        ('Start_Stop_ID', 'Distance'),
+        ('Start_Stop_ID', 'Distance'), 
         ('Start_Stop_ID', 'Zones_Crossed'),
-        ('Start_Stop_ID', 'Route_Type'),
-        ('Start_Stop_ID', 'Fare_Category'),
-        ('Start_Stop_ID', 'End_Stop_ID'),
-        ('Distance', 'Zones_Crossed'),
-        ('Distance', 'Fare_Category'),
-        ('Distance', 'Route_Type'),
-        ('Zones_Crossed', 'Fare_Category'),
-        ('Zones_Crossed', 'Route_Type'),
-        ('Fare_Category', 'Route_Type'),
-        ('Distance', 'End_Stop_ID'),
-        ('Zones_Crossed', 'End_Stop_ID'),
-        ('Route_Type', 'End_Stop_ID'),
-        ('Fare_Category', 'End_Stop_ID')
+        ('End_Stop_ID', 'Distance'), 
+        ('End_Stop_ID', 'Zones_Crossed'), 
+        ('Distance', 'Fare_Category'), 
+        ('Zones_Crossed', 'Fare_Category'), 
+        ('Route_Type', 'Fare_Category')
     ]
     
     model = bn.make_DAG(DAG_edges)
@@ -55,21 +47,13 @@ def make_pruned_network(df):
     """Define and fit a pruned Bayesian Network."""
     # Code to create a pruned network, fit it, and return the pruned model
     DAG_edges = [
-        ('Start_Stop_ID', 'Distance'),
+        ('Start_Stop_ID', 'Distance'), 
         ('Start_Stop_ID', 'Zones_Crossed'),
-        ('Start_Stop_ID', 'Route_Type'),
-        ('Start_Stop_ID', 'Fare_Category'),
-        ('Start_Stop_ID', 'End_Stop_ID'),
-        ('Distance', 'Zones_Crossed'),
-        ('Distance', 'Fare_Category'),
-        ('Distance', 'Route_Type'),
-        ('Zones_Crossed', 'Fare_Category'),
-        ('Zones_Crossed', 'Route_Type'),
-        ('Fare_Category', 'Route_Type'),
-        ('Distance', 'End_Stop_ID'),
-        ('Zones_Crossed', 'End_Stop_ID'),
-        ('Route_Type', 'End_Stop_ID'),
-        ('Fare_Category', 'End_Stop_ID')
+        ('End_Stop_ID', 'Distance'), 
+        ('End_Stop_ID', 'Zones_Crossed'), 
+        ('Distance', 'Fare_Category'), 
+        ('Zones_Crossed', 'Fare_Category'), 
+        ('Route_Type', 'Fare_Category')
     ]
     
     model = bn.make_DAG(DAG_edges)
@@ -106,12 +90,13 @@ def make_optimized_network(df):
     """Perform structure optimization and fit the optimized Bayesian Network."""
     # Code to optimize the structure, fit it, and return the optimized model
     DAG_edges = [
-        ('Distance', 'Zones_Crossed'),
-        ('Distance', 'Fare_Category'),
-        ('Zones_Crossed', 'Fare_Category'),
-        ('Route_Type', 'Fare_Category'),
-        ('Route_Type', 'Zones_Crossed'),
-        ('Route_Type', 'Distance')
+        ('Start_Stop_ID', 'Distance'), 
+        ('Start_Stop_ID', 'Zones_Crossed'),
+        ('End_Stop_ID', 'Distance'), 
+        ('End_Stop_ID', 'Zones_Crossed'), 
+        ('Distance', 'Fare_Category'), 
+        ('Zones_Crossed', 'Fare_Category'), 
+        ('Route_Type', 'Fare_Category')
     ]
     
     initial_model = bn.make_DAG(DAG_edges)
@@ -123,6 +108,9 @@ def make_optimized_network(df):
     print(f"Optimized model structure score (BIC): {optimized_score['bic']}")
 
     print("Optimized Bayesian Network created and fitted successfully.")
+
+    bn.plot(optimized_model, params_static={"layout": "spring", "title": "Optimized Bayesian Network"})
+    
     return optimized_model
 
 def save_model(fname, model):
