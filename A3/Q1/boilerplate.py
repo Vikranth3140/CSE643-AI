@@ -103,7 +103,9 @@ def make_optimized_network(df):
 
 def save_model(fname, model):
     """Save the model to a file using pickle."""
-    pass
+    with open(fname, 'wb') as file:
+        pickle.dump(model, file)
+    print(f"Model successfully saved to {fname}.")
 
 def evaluate(model_name, val_df):
     """Load and evaluate the specified model."""
