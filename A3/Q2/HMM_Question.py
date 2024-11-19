@@ -95,8 +95,15 @@ def emission_probability(state, observation,sigma):
     Returns:
     - float: The log probability of observing the given observation from the specified state.
     """
-    ###### YOUR CODE HERE ######
-    pass
+    position, _ = state
+    true_x, true_y = position
+    obs_x, obs_y = observation
+    
+    prob_x = -0.5 * ((obs_x - true_x) ** 2) / (sigma ** 2)
+    prob_y = -0.5 * ((obs_y - true_y) ** 2) / (sigma ** 2)
+    log_prob = prob_x + prob_y - np.log(2 * np.pi * sigma ** 2)
+    
+    return log_prob
 
 def transition_probability(prev_state, curr_state, movement_policy):
     """
@@ -115,8 +122,36 @@ def transition_probability(prev_state, curr_state, movement_policy):
              Returns 0.0 (log(1)) for certain transitions, -inf (log(0)) for impossible transitions,
              and a uniform log probability for equal transitions in the case of random walk.
     """
-    ###### YOUR CODE HERE ######
-    pass
+    prev_pos, prev_heading = prev_state
+    curr_pos, curr_heading = curr_state
+
+    # Extract possible moves
+    valid_moves = [
+        (prev_pos[0] + dx, prev_pos[1] + dy) for dx, dy in MOVEMENTS.values()
+        if not is_obstacle((prev_pos[0] + dx, prev_pos[1] + dy))
+    ]
+
+    if movement_policy == "random_walk":
+        # Uniform probability among valid moves
+        if curr_pos in valid_moves:
+            return -np.log(len(valid_moves))  # Uniform log probability
+        else:
+            return -np.inf  # Invalid move
+
+    elif movement_policy == "straight_until_obstacle":
+        # Expected position based on heading
+        dx, dy = MOVEMENTS[prev_heading]
+        expected_pos = (prev_pos[0] + dx, prev_pos[1] + dy)
+
+        if curr_pos == expected_pos:  # Valid deterministic move
+            return 0.0  # log(1)
+        elif is_obstacle(expected_pos) and curr_pos in valid_moves:
+            # Uniform probability among new valid moves after hitting obstacle
+            return -np.log(len(valid_moves))
+        else:
+            return -np.inf  # Invalid move
+
+    return -np.inf  # Invalid for unrecognized policies
 
 # ### Viterbi Algorithm
 def viterbi(observations, start_state, movement_policy,states,sigma):
@@ -135,8 +170,58 @@ def viterbi(observations, start_state, movement_policy,states,sigma):
     Returns:
     - list of tuples: The most probable sequence of states that could have led to the given observations.
     """
-    ###### YOUR CODE HERE ######
-    pass
+    T = len(observations)  # Number of time steps
+    V = [{}]  # Viterbi table to store the max probabilities
+    path = {}  # Path table to reconstruct the most likely sequence of states
+
+    # Initialization
+    for state in states:
+        if state == start_state:
+            V[0][state] = 0  # log(1)
+        else:
+            V[0][state] = -np.inf  # log(0)
+        path[state] = [state]
+
+    # Recursion
+    for t in range(1, T):
+        V.append({})
+        new_path = {}
+
+        for curr_state in states:
+            max_prob = -np.inf
+            best_prev_state = None
+
+            for prev_state in states:
+                trans_prob = transition_probability(prev_state, curr_state, movement_policy)
+                if trans_prob == -np.inf:
+                    continue  # Skip invalid transitions
+
+                emit_prob = emission_probability(curr_state, observations[t], sigma)
+                prob = V[t - 1][prev_state] + trans_prob + emit_prob
+
+                if prob > max_prob:
+                    max_prob = prob
+                    best_prev_state = prev_state
+
+            V[t][curr_state] = max_prob
+            if best_prev_state:
+                new_path[curr_state] = path[best_prev_state] + [curr_state]
+            else:
+                new_path[curr_state] = [curr_state]
+
+        path = new_path
+
+    # Termination
+    max_prob = max(V[-1].values())
+    best_last_state = None
+    for state, prob in V[-1].items():
+        if prob == max_prob:
+            best_last_state = state
+            break
+
+    # Reconstruct the most probable path
+    best_path = path[best_last_state]
+    return best_path
 
 
 # ### Evaluation (DO NOT CHANGE THIS)
@@ -262,8 +347,7 @@ if __name__ == "__main__":
     #   - A list (states) containing all possible states of the Roomba, where each state is represented as a tuple ((x, y), h)
     #   - x, y: The position on the grid.
     #   - h: The heading or direction (e.g., 'N', 'E', 'S', 'W').
-    states = []
-    ###### YOUR CODE HERE ######
+    states = [((x, y), h) for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT) for h in HEADINGS]
 
     
     # 4. Loop through each policy to estimate the Roomba's path using the Viterbi algorithm:
