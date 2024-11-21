@@ -137,15 +137,15 @@ def main():
     train_df, val_df = load_data()
 
     # Create and save base model
-    base_model = make_network(train_df)
+    base_model = make_network(train_df.copy())
     save_model("base_model.pkl", base_model)
 
     # Create and save pruned model
-    pruned_network = make_pruned_network(train_df)
+    pruned_network = make_pruned_network(train_df.copy())
     save_model("pruned_model.pkl", pruned_network)
 
     # Create and save optimized model
-    optimized_network = make_optimized_network(train_df)
+    optimized_network = make_optimized_network(train_df.copy())
     save_model("optimized_model.pkl", optimized_network)
 
     # Evaluate all models on the validation set
