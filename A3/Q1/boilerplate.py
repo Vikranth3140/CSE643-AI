@@ -89,27 +89,15 @@ def make_pruned_network(df):
 def make_optimized_network(df):
     """Perform structure optimization and fit the optimized Bayesian Network."""
     # Code to optimize the structure, fit it, and return the optimized model
-    DAG_edges = [
-        ('Start_Stop_ID', 'Distance'), 
-        ('Start_Stop_ID', 'Zones_Crossed'),
-        ('End_Stop_ID', 'Distance'), 
-        ('End_Stop_ID', 'Zones_Crossed'), 
-        ('Distance', 'Fare_Category'), 
-        ('Zones_Crossed', 'Fare_Category'), 
-        ('Route_Type', 'Fare_Category')
-    ]
+    hc_result = bn.structure_learning.fit(df, methodtype='hc', scoretype='bic')
     
-    initial_model = bn.make_DAG(DAG_edges)
-    initial_model = bn.parameter_learning.fit(initial_model, df)
+    optimized_dag = bn.make_DAG(hc_result['model_edges'])
+
+    optimized_model = bn.parameter_learning.fit(optimized_dag, df)
+
+    bn.plot(optimized_model, params_static={"layout": "spring", "title": "Optimized Bayesian Networ"})
     
-    optimized_model = bn.structure_learning.fit(df, methodtype='hc', scoretype='bic')
-
-    optimized_score = bn.structure_scores(optimized_model, df)
-    print(f"Optimized model structure score (BIC): {optimized_score['bic']}")
-
     print("Optimized Bayesian Network created and fitted successfully.")
-
-    bn.plot(optimized_model, params_static={"layout": "spring", "title": "Optimized Bayesian Network"})
     
     return optimized_model
 
