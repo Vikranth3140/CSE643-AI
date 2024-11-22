@@ -322,70 +322,39 @@ def plot_results(true_positions, observations, estimated_path, policy):
 
 
 if __name__ == "__main__":
-    try:
-        # 1. Set up the environment, including grid size, headings, and movements.
-        seed_values = [111, 222, 333]
-        sigma = 1.0  # Observation noise standard deviation
-        T = 50       # Number of time steps
+    # 1. Set up the environment, including grid size, headings, and movements.
+    seed = 111
+    setup_environment(seed)
+    sigma = 1.0  # Observation noise standard deviation
+    T = 50       # Number of time steps
 
-        # Simulate for both movement policies
-        policies = ['random_walk', 'straight_until_obstacle']
+    # Simulate for both movement policies
+    policies = ['random_walk', 'straight_until_obstacle']
+    results = {}
 
-        # Define the HMM states
-        GRID_WIDTH, GRID_HEIGHT, HEADINGS, MOVEMENTS = setup_environment()
+    # 2. Loop through each movement policy and simulate the Roomba's movement:
+    #    - Generate true positions, headings, and noisy observations.
+    #    - Store the results in the dictionary.
+    for policy in policies:
+        true_positions, headings, observations = simulate_roomba(T, policy,sigma)
+        results[policy] = {
+            'true_positions': true_positions,
+            'headings': headings,
+            'observations': observations
+        }
 
-        # 3. Define the HMM components
-        #   - A list (states) containing all possible states of the Roomba, where each state is represented as a tuple ((x, y), h)
-        #   - x, y: The position on the grid.
-        #   - h: The heading or direction (e.g., 'N', 'E', 'S', 'W').
-        states = [((x, y), h) for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT) for h in HEADINGS]
+    # 3. Define the HMM components
+    #   - A list (states) containing all possible states of the Roomba, where each state is represented as a tuple ((x, y), h)
+    #   - x, y: The position on the grid.
+    #   - h: The heading or direction (e.g., 'N', 'E', 'S', 'W').
+    states = [((x, y), h) for x in range(GRID_WIDTH) for y in range(GRID_HEIGHT) for h in HEADINGS]
 
-        results_csv = []
-
-        for seed in seed_values:
-            print(f"Testing with seed {seed}...")
-            setup_environment(seed)
-            results = {}
-
-            # 2. Loop through each movement policy and simulate the Roomba's movement:
-            #    - Generate true positions, headings, and noisy observations.
-            #    - Store the results in the dictionary.
-            for policy in policies:
-                true_positions, headings, observations = simulate_roomba(T, policy, sigma)
-                results[policy] = {
-                    'true_positions': true_positions,
-                    'headings': headings,
-                    'observations': observations
-                }
     
-            # 4. Loop through each policy to estimate the Roomba's path using the Viterbi algorithm:
-            #    - Retrieve the true positions and estimated path.
-            #    - Evaluate the accuracy of the Viterbi algorithm.
-            #    - Plot the true and estimated paths along with the observations.
-            for policy in policies:
-                print(f"Processing policy: {policy}")
-                true_positions, estimated_path = getestimatedPath(policy, results, states, sigma)
-                evaluate_viterbi(estimated_path, true_positions, T, policy)
-                plot_results(
-                    results[policy]['true_positions'],
-                    results[policy]['observations'],
-                    estimated_path,
-                    f"seed_{seed}_{policy}"
-                )
-
-                # Save results for CSV
-                results_csv.append({
-                    'seed': seed,
-                    'policy': policy,
-                    'estimated_path': estimated_path
-                })
-
-        # Save estimated paths to CSV
-        import pandas as pd
-        df = pd.DataFrame(results_csv)
-        df['estimated_path'] = df['estimated_path'].apply(lambda path: [((x[0][0], x[0][1]), x[1]) for x in path])
-        df.to_csv('estimated_paths.csv', index=False)
-        print("Results saved to 'estimated_paths.csv'.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    # 4. Loop through each policy to estimate the Roomba's path using the Viterbi algorithm:
+    #    - Retrieve the true positions and estimated path.
+    #    - Evaluate the accuracy of the Viterbi algorithm.
+    #    - Plot the true and estimated paths along with the observations.
+    for policy in policies:
+        true_positions, estimated_path = getestimatedPath(policy,results,states,sigma)
+        evaluate_viterbi(estimated_path, true_positions, T,policy)
+        plot_results(true_positions, observations, estimated_path, policy)
