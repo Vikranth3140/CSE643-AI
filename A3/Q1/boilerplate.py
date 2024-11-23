@@ -103,9 +103,9 @@ def make_optimized_network(df):
 
     optimized_model = bn.parameter_learning.fit(optimized_dag, df)
 
-    bn.plot(optimized_model, params_static={"layout": "spring", "title": "Optimized Bayesian Network (HC Search)"})
-    
     print("Optimized network created successfully.")
+
+    bn.plot(optimized_model, params_static={"layout": "spring", "title": "Optimized Bayesian Network (HC Search)"})
     
     return optimized_model
 
