@@ -382,10 +382,16 @@ if __name__ == "__main__":
                 })
 
         # Save estimated paths to CSV
-        import pandas as pd
-        df = pd.DataFrame(results_csv)
-        df['estimated_path'] = df['estimated_path'].apply(lambda path: [((x[0][0], x[0][1]), x[1]) for x in path])
-        df.to_csv('estimated_paths.csv', index=False)
+        with open('estimated_paths.csv', mode='w') as file:
+            file.write('seed,policy,estimated_path\n')
+            
+            for result in results_csv:
+                seed = result['seed']
+                policy = result['policy']
+                estimated_path = [((x[0][0], x[0][1]), x[1]) for x in result['estimated_path']]
+                estimated_path_str = str(estimated_path).replace(' ', '')
+                file.write(f"{seed},{policy},{estimated_path_str}\n")
+
         print("Results saved to 'estimated_paths.csv'.")
 
     except Exception as e:
