@@ -1,4 +1,5 @@
 from imblearn.over_sampling import SMOTE, ADASYN
+from imblearn.under_sampling import RandomUnderSampler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import train_test_split
@@ -21,17 +22,9 @@ def categorize_price(price):
 
 train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
 
-# Check column names
-print("Available Columns:")
-print(train_data.columns)
-
 # Prepare features (X) and target (y)
 X = train_data.drop(columns=['Price', 'Price_Category', 'Address', 'Possesion', 'Furnishing'])
 y = train_data['Price_Category']
-
-# Confirm data preparation
-print(f"Feature Matrix Shape: {X.shape}")
-print(f"Target Variable Distribution:\n{y.value_counts()}")
 
 # Split data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -40,17 +33,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 print("Original Training Set Distribution:")
 print(y_train.value_counts())
 
-# Initialize SMOTE and ADASYN
+# Initialize SMOTE and apply
 smote = SMOTE(random_state=42)
-adasyn = ADASYN(random_state=42)
-
-# Apply SMOTE
 X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
 print("\nSMOTE Distribution:")
 print(y_train_smote.value_counts())
 
-# Apply ADASYN
-X_train_adasyn, y_train_adasyn = adasyn.fit_resample(X_train, y_train)
+# Introduce artificial imbalance
+undersampler = RandomUnderSampler(sampling_strategy={'Low': 100, 'Medium': 100, 'High': 100, 'Very High': 50})
+X_train_imbalanced, y_train_imbalanced = undersampler.fit_resample(X_train, y_train)
+
+print("\nImbalanced Training Set Distribution (Before ADASYN):")
+print(y_train_imbalanced.value_counts())
+
+# Apply ADASYN on imbalanced data
+adasyn = ADASYN(random_state=42)
+X_train_adasyn, y_train_adasyn = adasyn.fit_resample(X_train_imbalanced, y_train_imbalanced)
 print("\nADASYN Distribution:")
 print(y_train_adasyn.value_counts())
 
@@ -76,22 +74,22 @@ plt.ylabel("Number of Samples")
 plt.tight_layout()
 plt.show()
 
-# Train a Decision Tree with SMOTE-balanced data
+# Train Decision Tree Classifier on SMOTE-balanced data
 dt_smote = DecisionTreeClassifier(random_state=42)
 dt_smote.fit(X_train_smote, y_train_smote)
 y_pred_smote = dt_smote.predict(X_test)
 
-# Train a Decision Tree with ADASYN-balanced data
+# Train Decision Tree Classifier on ADASYN-balanced data
 dt_adasyn = DecisionTreeClassifier(random_state=42)
 dt_adasyn.fit(X_train_adasyn, y_train_adasyn)
 y_pred_adasyn = dt_adasyn.predict(X_test)
 
-# Evaluate the SMOTE model
-print("SMOTE Model Performance:")
+# Evaluate SMOTE model
+print("\nSMOTE Model Performance:")
 print(classification_report(y_test, y_pred_smote))
-print(f"Accuracy: {accuracy_score(y_test, y_pred_smote):.2f}\n")
+print(f"SMOTE Accuracy: {accuracy_score(y_test, y_pred_smote):.2f}\n")
 
-# Evaluate the ADASYN model
-print("ADASYN Model Performance:")
+# Evaluate ADASYN model
+print("\nADASYN Model Performance:")
 print(classification_report(y_test, y_pred_adasyn))
-print(f"Accuracy: {accuracy_score(y_test, y_pred_adasyn):.2f}")
+print(f"ADASYN Accuracy: {accuracy_score(y_test, y_pred_adasyn):.2f}")
