@@ -5,35 +5,33 @@ import matplotlib.pyplot as plt
 # Load the dataset
 train_data = pd.read_csv('../dataset/train.csv')
 
-# Compute correlation matrix for numerical columns
-correlation_matrix = train_data.corr()
+# Select only numerical columns for correlation analysis
+numerical_data = train_data.select_dtypes(include=['float64', 'int64'])
 
-# Correlation with the target variable (assumed 'Price' here; replace if different)
-target_correlation = correlation_matrix['Price']
-print("\nCorrelation with Target Variable:")
-print(target_correlation)
+# Compute the correlation matrix for numerical columns only
+correlation_matrix = numerical_data.corr()
 
-# Identify columns with weak correlation (-0.1 to 0.1)
-weak_correlation_columns = target_correlation[(target_correlation > -0.1) & (target_correlation < 0.1)].index
-print("\nColumns to Drop Due to Weak Correlation:")
-print(weak_correlation_columns)
+# Correlation with the target variable (assumed 'Price')
+if 'Price' in correlation_matrix.columns:
+    target_correlation = correlation_matrix['Price']
+    print("\nCorrelation with Target Variable:")
+    print(target_correlation)
 
-# Drop columns with weak correlation
-train_data = train_data.drop(columns=weak_correlation_columns)
+    # Identify columns with weak correlation in the range [-0.1, 0.1]
+    weak_correlation_columns = target_correlation[(target_correlation > -0.1) & (target_correlation < 0.1)].index
+    print("\nColumns to Drop Due to Weak Correlation:")
+    print(weak_correlation_columns)
 
-# Provide justification for dropping each column
-for column in weak_correlation_columns:
-    print(f"Column '{column}' was dropped due to weak correlation ({target_correlation[column]:.2f}) with 'Price'.")
+    # Drop these columns from the dataset
+    train_data = train_data.drop(columns=weak_correlation_columns)
 
-# Drop non-predictive columns (e.g., 'index', 'Address')
-non_predictive_columns = ['index', 'Address']  # Replace with actual columns you want to drop
-train_data = train_data.drop(columns=non_predictive_columns)
+    # Provide justification for each dropped column
+    for column in weak_correlation_columns:
+        print(f"Column '{column}' was dropped due to weak correlation ({target_correlation[column]:.2f}) with 'Price'.")
+else:
+    print("Target variable 'Price' is not found in the correlation matrix.")
 
-# Provide justification for dropping each column
-for column in non_predictive_columns:
-    print(f"Column '{column}' was dropped as it does not contribute meaningfully to prediction.")
-
-# Visualize the correlation matrix
+# Optional: Visualize the correlation matrix
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title("Correlation Matrix")
