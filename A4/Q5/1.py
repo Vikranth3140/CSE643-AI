@@ -1,0 +1,97 @@
+from imblearn.over_sampling import SMOTE, ADASYN
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Load dataset
+train_data = pd.read_csv('../dataset/train.csv')
+
+# Ensure 'Price_Category' column exists
+def categorize_price(price):
+    if price < train_data['Price'].quantile(0.25):
+        return 'Low'
+    elif price < train_data['Price'].quantile(0.5):
+        return 'Medium'
+    elif price < train_data['Price'].quantile(0.75):
+        return 'High'
+    else:
+        return 'Very High'
+
+train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
+
+# Check column names
+print("Available Columns:")
+print(train_data.columns)
+
+# Prepare features (X) and target (y)
+X = train_data.drop(columns=['Price', 'Price_Category', 'Address', 'Possesion', 'Furnishing'])
+y = train_data['Price_Category']
+
+# Confirm data preparation
+print(f"Feature Matrix Shape: {X.shape}")
+print(f"Target Variable Distribution:\n{y.value_counts()}")
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+
+# Display initial distribution
+print("Original Training Set Distribution:")
+print(y_train.value_counts())
+
+# Initialize SMOTE and ADASYN
+smote = SMOTE(random_state=42)
+adasyn = ADASYN(random_state=42)
+
+# Apply SMOTE
+X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+print("\nSMOTE Distribution:")
+print(y_train_smote.value_counts())
+
+# Apply ADASYN
+X_train_adasyn, y_train_adasyn = adasyn.fit_resample(X_train, y_train)
+print("\nADASYN Distribution:")
+print(y_train_adasyn.value_counts())
+
+# Visualize distributions
+plt.figure(figsize=(12, 6))
+
+# SMOTE
+plt.subplot(1, 2, 1)
+smote_counts = y_train_smote.value_counts()
+plt.bar(smote_counts.index, smote_counts.values, color='skyblue', edgecolor='black')
+plt.title("SMOTE Distribution")
+plt.xlabel("Price Categories")
+plt.ylabel("Number of Samples")
+
+# ADASYN
+plt.subplot(1, 2, 2)
+adasyn_counts = y_train_adasyn.value_counts()
+plt.bar(adasyn_counts.index, adasyn_counts.values, color='orange', edgecolor='black')
+plt.title("ADASYN Distribution")
+plt.xlabel("Price Categories")
+plt.ylabel("Number of Samples")
+
+plt.tight_layout()
+plt.show()
+
+# Train a Decision Tree with SMOTE-balanced data
+dt_smote = DecisionTreeClassifier(random_state=42)
+dt_smote.fit(X_train_smote, y_train_smote)
+y_pred_smote = dt_smote.predict(X_test)
+
+# Train a Decision Tree with ADASYN-balanced data
+dt_adasyn = DecisionTreeClassifier(random_state=42)
+dt_adasyn.fit(X_train_adasyn, y_train_adasyn)
+y_pred_adasyn = dt_adasyn.predict(X_test)
+
+# Evaluate the SMOTE model
+print("SMOTE Model Performance:")
+print(classification_report(y_test, y_pred_smote))
+print(f"Accuracy: {accuracy_score(y_test, y_pred_smote):.2f}\n")
+
+# Evaluate the ADASYN model
+print("ADASYN Model Performance:")
+print(classification_report(y_test, y_pred_adasyn))
+print(f"Accuracy: {accuracy_score(y_test, y_pred_adasyn):.2f}")
