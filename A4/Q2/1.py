@@ -1,29 +1,29 @@
 import pandas as pd
 
 # Load the dataset
-data = pd.read_csv('../dataset/train.csv')
+train_data = pd.read_csv('../dataset/train.csv')
 
-# Display dataset overview
+# Overview of the dataset
 print("Dataset Overview:")
-print(data.info())  # Overview of columns, data types, and non-null counts
+print(train_data.info())  # Provides data types and non-null counts
 
-# Summarize unique values in each column
+# Display unique values in each column
 print("\nUnique Values in Each Column:")
-print(data.nunique())
+unique_values = train_data.nunique()
+print(unique_values)
 
-# Display first few rows for a quick look
+# Display the first few rows of the dataset for reference
 print("\nSample Data:")
-print(data.head())
-
+print(train_data.head())
 
 # Select numerical columns
-numerical_cols = data.select_dtypes(include=['float64', 'int64'])
+numerical_columns = train_data.select_dtypes(include=['float64', 'int64'])
 
-# Perform detailed statistical analysis
+# Perform statistical analysis
 print("\nStatistical Analysis of Numerical Columns:")
-stats = numerical_cols.describe(percentiles=[0.25, 0.5, 0.75]).T  # Transpose for better readability
-stats['std'] = numerical_cols.std()  # Add standard deviation explicitly
+stats = numerical_columns.describe(percentiles=[0.25, 0.5, 0.75]).T  # Transpose for readability
+stats['std'] = numerical_columns.std()  # Add standard deviation explicitly
 print(stats)
 
-# Save stats to a CSV file (optional)
-stats.to_csv('numerical_stats.csv', index=True)
+# Optionally save the statistics to a file for reference
+stats.to_csv('numerical_column_stats.csv', index=True)
