@@ -16,11 +16,11 @@ plt.show()
 
 # Define price brackets
 def categorize_price(price):
-    if price < 10000000:
+    if price < train_data['Price'].quantile(0.25):
         return 'Low'
-    elif 10000000 <= price < 25000000:
+    elif price < train_data['Price'].quantile(0.5):
         return 'Medium'
-    elif 25000000 <= price < 50000000:
+    elif price < train_data['Price'].quantile(0.75):
         return 'High'
     else:
         return 'Very High'
