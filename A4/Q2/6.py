@@ -27,18 +27,24 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 print("Original Training Set Distribution:")
 print(y_train.value_counts())
 
-undersampler = RandomUnderSampler(random_state=42)
-
 # Apply undersampling
+undersampler = RandomUnderSampler(random_state=42)
 X_train_under, y_train_under = undersampler.fit_resample(X_train, y_train)
+
+# Save undersampled data to CSV
+undersampled_data = pd.concat([X_train_under, y_train_under], axis=1)
+undersampled_data.to_csv('undersampled_data.csv', index=False)
 
 print("\nDistribution After Random Undersampling:")
 print(y_train_under.value_counts())
 
-oversampler = RandomOverSampler(random_state=42)
-
 # Apply oversampling
+oversampler = RandomOverSampler(random_state=42)
 X_train_over, y_train_over = oversampler.fit_resample(X_train, y_train)
+
+# Save oversampled data to CSV
+oversampled_data = pd.concat([X_train_over, y_train_over], axis=1)
+oversampled_data.to_csv('oversampled_data.csv', index=False)
 
 print("\nDistribution After Random Oversampling:")
 print(y_train_over.value_counts())
@@ -50,7 +56,6 @@ plt.xlabel('Price Category')
 plt.ylabel('Number of Samples')
 output_path = "Plots/undersampling_price_category_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
-
 plt.show()
 
 plt.figure(figsize=(8, 6))
@@ -60,5 +65,4 @@ plt.xlabel('Price Category')
 plt.ylabel('Number of Samples')
 output_path = "Plots/oversampling_price_category_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
-
 plt.show()
