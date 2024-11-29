@@ -33,5 +33,4 @@ plt.title("Correlation Matrix")
 
 output_path = "Plots/correlation_matrix.png"
 plt.savefig(output_path, bbox_inches='tight')
-
 plt.show()

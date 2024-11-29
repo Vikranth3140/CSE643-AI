@@ -15,7 +15,6 @@ plt.grid(axis='y')
 
 output_path = "Plots/price_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
-
 plt.show()
 
 def categorize_price(price):
@@ -43,7 +42,6 @@ plt.ylabel('Number of Properties')
 
 output_path = "Plots/price_category_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
-
 plt.show()
 
 print("\nDistribution of Properties Across Price Categories:")
