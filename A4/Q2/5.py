@@ -32,7 +32,6 @@ train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
 
 print(train_data[['Price', 'Price_Category']].head())
 
-# Count the distribution of price categories
 category_counts = train_data['Price_Category'].value_counts()
 
 # Plot the distribution of price categories
@@ -47,6 +46,5 @@ plt.savefig(output_path, bbox_inches='tight')
 
 plt.show()
 
-# Print the counts for further analysis
 print("\nDistribution of Properties Across Price Categories:")
 print(category_counts)
