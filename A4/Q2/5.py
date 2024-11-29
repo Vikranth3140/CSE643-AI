@@ -2,10 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Load the dataset
 train_data = pd.read_csv('../dataset/train.csv')
 
-# Plot the distribution of the 'Price' variable
 plt.figure(figsize=(10, 6))
 plt.hist(train_data['Price'], bins=10, color='skyblue', edgecolor='black')
 plt.title('Distribution of Property Prices')
