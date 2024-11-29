@@ -1,7 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
+os.makedirs("Plots", exist_ok=True)
 train_data = pd.read_csv('../dataset/train.csv')
 
 plt.figure(figsize=(10, 6))
@@ -10,9 +12,12 @@ plt.title('Distribution of Property Prices')
 plt.xlabel('Price')
 plt.ylabel('Frequency')
 plt.grid(axis='y')
+
+output_path = "Plots/price_distribution.png"
+plt.savefig(output_path, bbox_inches='tight')
+
 plt.show()
 
-# Define price brackets
 def categorize_price(price):
     if price < train_data['Price'].quantile(0.25):
         return 'Low'
@@ -23,10 +28,8 @@ def categorize_price(price):
     else:
         return 'Very High'
 
-# Create a new column for price categories
 train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
 
-# Display the first few rows to verify
 print(train_data[['Price', 'Price_Category']].head())
 
 # Count the distribution of price categories
@@ -38,6 +41,10 @@ sns.barplot(x=category_counts.index, y=category_counts.values, palette='viridis'
 plt.title('Distribution of Properties Across Price Categories')
 plt.xlabel('Price Category')
 plt.ylabel('Number of Properties')
+
+output_path = "Plots/price_category_distribution.png"
+plt.savefig(output_path, bbox_inches='tight')
+
 plt.show()
 
 # Print the counts for further analysis

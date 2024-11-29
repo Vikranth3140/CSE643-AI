@@ -1,6 +1,9 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import os
+
+os.makedirs("Plots", exist_ok=True)
 
 train_data = pd.read_csv('../dataset/train.csv')
 
@@ -27,4 +30,8 @@ else:
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title("Correlation Matrix")
+
+output_path = "Plots/correlation_matrix.png"
+plt.savefig(output_path, bbox_inches='tight')
+
 plt.show()
