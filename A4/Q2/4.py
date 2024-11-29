@@ -21,6 +21,8 @@ for col in categorical_columns:
 numerical_columns = train_data.select_dtypes(include=['float64', 'int64']).columns
 
 
+# I decided to do the analysis here itself on training Decision Tree on scaled and unscaled data
+
 # Training Decision Tree on unscaled data
 X_unscaled = train_data.drop(columns=['Price'])
 y_unscaled = train_data['Price']
