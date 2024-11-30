@@ -24,12 +24,24 @@ model = DecisionTreeRegressor(
     min_samples_split=2
 )
 model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
 
-r2 = r2_score(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
-mae = mean_absolute_error(y_test, y_pred)
+y_train_pred = model.predict(X_train)
+y_test_pred = model.predict(X_test)
 
-print(f"Test R^2 Score: {r2}")
-print(f"Test Mean Squared Error: {mse}")
-print(f"Test Mean Absolute Error: {mae}")
+r2_train = r2_score(y_train, y_train_pred)
+mse_train = mean_squared_error(y_train, y_train_pred)
+mae_train = mean_absolute_error(y_train, y_train_pred)
+
+r2_test = r2_score(y_test, y_test_pred)
+mse_test = mean_squared_error(y_test, y_test_pred)
+mae_test = mean_absolute_error(y_test, y_test_pred)
+
+print("Train Performance:")
+print(f"  R² Score: {r2_train:.4f}")
+print(f"  Mean Squared Error: {mse_train:.4f}")
+print(f"  Mean Absolute Error: {mae_train:.4f}")
+
+print("\nTest Performance:")
+print(f"  R² Score: {r2_test:.4f}")
+print(f"  Mean Squared Error: {mse_test:.4f}")
+print(f"  Mean Absolute Error: {mae_test:.4f}")
