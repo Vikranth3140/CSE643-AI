@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
 import os
 
@@ -16,6 +17,13 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # Training Decision Tree on processed data
 model = DecisionTreeRegressor(random_state=42)
 model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+print(f"\nR2 Score: {r2}")
+print(f"\nMean Squared Error (Tuned Model): {mse}")
 
 print(f"Decision Tree Depth: {model.get_depth()}")
 print(f"Number of Leaves: {model.get_n_leaves()}")
