@@ -1,7 +1,5 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 
 os.makedirs("Plots", exist_ok=True)
