@@ -1,7 +1,12 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score, mean_squared_error
+import matplotlib.pyplot as plt
+import os
+
+os.makedirs("Plots", exist_ok=True)
 
 # train_data = pd.read_csv('../dataset/train.csv')
 train_data = pd.read_csv('../processed_train_data.csv')
@@ -20,58 +25,63 @@ model = DecisionTreeRegressor(
 )
 model.fit(X_train, y_train)
 
-
-
 # Get effective alphas and corresponding total leaf impurities for pruning
 path = model.cost_complexity_pruning_path(X_train, y_train)
-ccp_alphas, impurities = path.ccp_alphas, path.impurities
+ccp_alphas = path.ccp_alphas
+impurities = path.impurities
 
 # Train a series of Decision Trees with different ccp_alpha values
-trees = []
-for ccp_alpha in ccp_alphas:
-    tree = DecisionTreeRegressor(random_state=42, ccp_alpha=ccp_alpha)
-    tree.fit(X_train, y_train)
-    trees.append(tree)
+models = []
+train_mse = []
+test_mse = []
 
-# Evaluate pruned trees using their training and testing errors
-train_scores = [mean_squared_error(y_train, tree.predict(X_train)) for tree in trees]
-test_scores = [mean_squared_error(y_test, tree.predict(X_test)) for tree in trees]
-
-
-
-import matplotlib.pyplot as plt
+for alpha in ccp_alphas:
+    pruned_model = DecisionTreeRegressor(random_state=42, ccp_alpha=alpha)
+    pruned_model.fit(X_train, y_train)
+    models.append(pruned_model)
+    train_mse.append(mean_squared_error(y_train, pruned_model.predict(X_train)))
+    test_mse.append(mean_squared_error(y_test, pruned_model.predict(X_test)))
 
 # Plot training and testing errors vs ccp_alpha
 plt.figure(figsize=(10, 6))
-plt.plot(ccp_alphas, train_scores, marker='o', label='Training Error')
-plt.plot(ccp_alphas, test_scores, marker='o', label='Testing Error')
+plt.plot(ccp_alphas, train_mse, label='Train MSE', marker='o')
+plt.plot(ccp_alphas, test_mse, label='Test MSE', marker='o')
 plt.xlabel('ccp_alpha')
 plt.ylabel('Mean Squared Error')
-plt.title('Effect of Minimal Cost-Complexity Pruning')
+plt.title('Effect of Minimal Cost-Complexity Pruning on MSE')
 plt.legend()
 plt.grid()
-plt.show()
 
+output_path = "Plots/pruning_effect_mse_scores.png"
+plt.savefig(output_path, bbox_inches='tight')
+plt.show()
 
 # Select the best tree (minimum testing error)
-best_alpha_index = test_scores.index(min(test_scores))
-best_alpha = ccp_alphas[best_alpha_index]
-pruned_tree = trees[best_alpha_index]
+optimal_alpha = ccp_alphas[test_mse.index(min(test_mse))]
+print(f"Optimal ccp_alpha: {optimal_alpha}")
 
-# Print the optimal ccp_alpha and its corresponding test error
-print(f"Optimal ccp_alpha: {best_alpha}")
-print(f"Mean Squared Error (Pruned Tree): {test_scores[best_alpha_index]}")
+# Retrain the Tree with Optimal ccp_alpha
+pruned_model = DecisionTreeRegressor(
+    random_state=42,
+    max_depth=10,
+    max_features=None,
+    min_samples_leaf=2,
+    min_samples_split=2,
+    ccp_alpha=optimal_alpha
+)
+pruned_model.fit(X_train, y_train)
 
+y_pred = pruned_model.predict(X_test)
+r2 = r2_score(y_test, y_pred)
+final_mse = mean_squared_error(y_test, y_pred)
 
-# Visualize the original (unpruned) tree
+print(f"Pruned Model R2 Score: {r2}")
+print(f"Pruned Model Mean Squared Error: {final_mse}")
+
 plt.figure(figsize=(20, 10))
-plot_tree(model, feature_names=X.columns, filled=True, rounded=True, fontsize=10)
-plt.title("Unpruned Decision Tree")
-plt.show()
+plot_tree(pruned_model, filled=True, feature_names=X.columns, rounded=True)
+plt.title("Decision Tree After Pruning")
 
-
-# Visualize the pruned tree
-plt.figure(figsize=(20, 10))
-plot_tree(pruned_tree, feature_names=X.columns, filled=True, rounded=True, fontsize=10)
-plt.title("Pruned Decision Tree")
+output_path = "Plots/pruned_decision_tree.png"
+plt.savefig(output_path, bbox_inches='tight')
 plt.show()
