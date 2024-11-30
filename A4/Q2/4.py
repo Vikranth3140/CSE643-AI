@@ -12,6 +12,7 @@ train_data = pd.read_csv('../dataset/train.csv')
 categorical_columns = train_data.select_dtypes(include=['object']).columns
 print("Categorical Columns:", categorical_columns)
 
+# Label encoding the categorical columns
 label_encoder = LabelEncoder()
 
 for col in categorical_columns:
