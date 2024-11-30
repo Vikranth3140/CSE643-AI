@@ -1,7 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from imblearn.over_sampling import SMOTE, ADASYN
+from imblearn.under_sampling import RandomUnderSampler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, accuracy_score
 import matplotlib.pyplot as plt
 import os
 
@@ -10,22 +12,9 @@ os.makedirs("Plots", exist_ok=True)
 # train_data = pd.read_csv('../dataset/train.csv')
 train_data = pd.read_csv('../processed_train_data.csv')
 
-X = train_data.drop(columns=['Price'])
-y = train_data['Price']
+X = train_data.drop(columns=['Price_Category'])
+y = train_data['Price_Category']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Training Decision Tree on processed data using the Best Hyperparameters found in 2b
-# Do not need to prune the tree as `ccp_alpha` = 0 is the best hyperparameter
-model = DecisionTreeRegressor(
-    random_state=42,
-    max_depth=10,
-    max_features=None,
-    min_samples_leaf=2,
-    min_samples_split=2
-)
-model.fit(X_train, y_train)
-
-
 
 # Display initial distribution
 print("Original Training Set Distribution:")
