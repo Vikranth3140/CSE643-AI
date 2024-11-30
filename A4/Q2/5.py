@@ -4,6 +4,7 @@ import seaborn as sns
 import os
 
 os.makedirs("Plots", exist_ok=True)
+
 train_data = pd.read_csv('../dataset/train.csv')
 
 plt.figure(figsize=(10, 6))
