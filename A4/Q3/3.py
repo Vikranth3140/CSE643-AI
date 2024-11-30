@@ -79,6 +79,14 @@ print(f"Pruned Model R2 Score: {r2}")
 print(f"Pruned Model Mean Squared Error: {final_mse}")
 
 plt.figure(figsize=(20, 10))
+plot_tree(model, filled=True, feature_names=X.columns, rounded=True)
+plt.title("Decision Tree Before Pruning")
+
+output_path = "Plots/unpruned_decision_tree.png"
+plt.savefig(output_path, bbox_inches='tight')
+plt.show()
+
+plt.figure(figsize=(20, 10))
 plot_tree(pruned_model, filled=True, feature_names=X.columns, rounded=True)
 plt.title("Decision Tree After Pruning")
 
