@@ -56,7 +56,6 @@ for feature in top_3_features:
     )
     feature_model.fit(X_train_feat, y_train_feat)
 
-    # Predict and calculate RMSE
     y_pred_feat = feature_model.predict(X_test_feat)
     rmse = np.sqrt(mean_squared_error(y_test_feat, y_pred_feat))
     print(f"RMSE when using only {feature}: {rmse}")
