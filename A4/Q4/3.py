@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
 import os
 
@@ -25,67 +26,37 @@ model = DecisionTreeRegressor(
 )
 model.fit(X_train, y_train)
 
-y_train_pred = model.predict(X_train)
-y_test_pred = model.predict(X_test)
+# Identify Top 3 Important Features
+feature_importances = model.feature_importances_
+important_features = pd.Series(feature_importances, index=X.columns).sort_values(ascending=False)
+top_3_features = important_features.head(3).index
+print("Top 3 Important Features:\n", important_features.head(3))
 
-r2_train = r2_score(y_train, y_train_pred)
-mse_train = mean_squared_error(y_train, y_train_pred)
-mae_train = mean_absolute_error(y_train, y_train_pred)
-
-r2_test = r2_score(y_test, y_test_pred)
-mse_test = mean_squared_error(y_test, y_test_pred)
-mae_test = mean_absolute_error(y_test, y_test_pred)
-
-print("Train Performance:")
-print(f"  R² Score: {r2_train:.4f}")
-print(f"  Mean Squared Error: {mse_train:.4f}")
-print(f"  Mean Absolute Error: {mae_train:.4f}")
-
-print("\nTest Performance:")
-print(f"  R² Score: {r2_test:.4f}")
-print(f"  Mean Squared Error: {mse_test:.4f}")
-print(f"  Mean Absolute Error: {mae_test:.4f}")
-
-
-# Extract feature importances
-
-feature_importances = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)
-top_features = feature_importances.head(3).index
-print("Top 3 Important Features:")
-print(top_features)
-
-# Visualize the relationship for each feature
-for feature in top_features:
-    plt.figure(figsize=(10, 6))
-    plt.scatter(X[feature], y, alpha=0.6, edgecolor='black')
-    plt.title(f"{feature} vs. Price")
+for feature in top_3_features:
+    plt.figure(figsize=(8, 6))
+    plt.scatter(train_data[feature], train_data['Price'], alpha=0.6, edgecolor='k')
+    plt.title(f"Effect of {feature} on Price")
     plt.xlabel(feature)
     plt.ylabel("Price")
-    plt.grid(True)
+    plt.grid()
+    output_path = f"Plots/{feature}_vs_Price.png"
+    plt.savefig(output_path, bbox_inches='tight')
     plt.show()
 
-# Initialize dictionary to store RMSE values
-feature_rmse = {}
+# Calculate RMSE for Each Feature
+for feature in top_3_features:
+    X_feature = train_data[[feature]]
+    X_train_feat, X_test_feat, y_train_feat, y_test_feat = train_test_split(X_feature, y, test_size=0.2, random_state=42)
 
-# Fit models and calculate RMSE
-for feature in top_features:
-    # Reshape feature for regression
-    X_feature = X[[feature]]
-    
-    # Train-test split for individual feature
-    X_train_feature, X_test_feature, y_train, y_test = train_test_split(X_feature, y, test_size=0.2, random_state=42)
-    
-    # Train linear regression model
-    model = LinearRegression()
-    model.fit(X_train_feature, y_train)
-    
-    # Predict on test data
-    y_pred = model.predict(X_test_feature)
-    
-    # Compute RMSE
-    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-    feature_rmse[feature] = rmse
-    
-    print(f"Feature: {feature}")
-    print(f"RMSE: {rmse:.2f}")
-    print()
+    feature_model = DecisionTreeRegressor(
+        random_state=42,
+        max_depth=10,
+        min_samples_leaf=2,
+        min_samples_split=2
+    )
+    feature_model.fit(X_train_feat, y_train_feat)
+
+    # Predict and calculate RMSE
+    y_pred_feat = feature_model.predict(X_test_feat)
+    rmse = np.sqrt(mean_squared_error(y_test_feat, y_pred_feat))
+    print(f"RMSE when using only {feature}: {rmse}")
