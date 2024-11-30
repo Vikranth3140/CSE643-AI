@@ -39,6 +39,7 @@ for feature in top_3_features:
     plt.xlabel(feature)
     plt.ylabel("Price")
     plt.grid()
+    
     output_path = f"Plots/{feature}_vs_Price.png"
     plt.savefig(output_path, bbox_inches='tight')
     plt.show()
