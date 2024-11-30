@@ -1,8 +1,9 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_score, learning_curve
 from sklearn.tree import DecisionTreeRegressor, plot_tree
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 
 os.makedirs("Plots", exist_ok=True)
@@ -25,48 +26,51 @@ model = DecisionTreeRegressor(
 )
 model.fit(X_train, y_train)
 
-
-
-
-
-
-
 # Perform 5-fold cross-validation
-cv_scores = cross_val_score(dt_regressor, X_train, y_train, cv=5, scoring='neg_mean_squared_error')
+# We use Negative MSE as the scoring metric
+cv_mse = cross_val_score(
+    model,
+    X,
+    y,
+    cv=5,
+    scoring='neg_mean_squared_error'
+)
+cv_mse = -cv_mse
+print("Cross-Validation MSE Scores:", cv_mse)
+print("Mean CV MSE:", np.mean(cv_mse))
 
-# Calculate mean and standard deviation of cross-validation scores
-mean_cv_score = -cv_scores.mean()
-std_cv_score = cv_scores.std()
-
-print(f"Mean CV MSE: {mean_cv_score:.2f}")
-print(f"Standard Deviation of CV MSE: {std_cv_score:.2f}")
-
-
-from sklearn.model_selection import learning_curve
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Generate learning curves
-train_sizes, train_scores, val_scores = learning_curve(
-    dt_regressor, X_train, y_train, cv=5, scoring='neg_mean_squared_error', train_sizes=np.linspace(0.1, 1.0, 10), random_state=42
+# Implement Learning Curves
+train_sizes, train_scores, validation_scores = learning_curve(
+    model,
+    X,
+    y,
+    train_sizes=np.linspace(0.1, 1.0, 10),
+    cv=5,
+    scoring='neg_mean_squared_error',
+    random_state=42
 )
 
-# Calculate mean and standard deviation for training and validation scores
-train_mean = -np.mean(train_scores, axis=1)
-train_std = np.std(train_scores, axis=1)
-val_mean = -np.mean(val_scores, axis=1)
-val_std = np.std(val_scores, axis=1)
+train_errors = -train_scores.mean(axis=1)
+validation_errors = -validation_scores.mean(axis=1)
 
-# Plot learning curves
+# Plot Learning Curves
 plt.figure(figsize=(10, 6))
-plt.plot(train_sizes, train_mean, label="Training Error", marker='o')
-plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.2)
-plt.plot(train_sizes, val_mean, label="Validation Error", marker='o')
-plt.fill_between(train_sizes, val_mean - val_std, val_mean + val_std, alpha=0.2)
-
-plt.title("Learning Curves")
+plt.plot(train_sizes, train_errors, label="Training Error (MSE)", marker="o")
+plt.plot(train_sizes, validation_errors, label="Validation Error (MSE)", marker="o")
+plt.title("Learning Curves: Decision Tree (MSE)")
 plt.xlabel("Training Set Size")
 plt.ylabel("Mean Squared Error")
 plt.legend()
 plt.grid()
+
+output_path = "Plots/learning_curves_decision_tree_mse.png"
+plt.savefig(output_path, bbox_inches='tight')
 plt.show()
+
+y_pred = model.predict(X_test)
+
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+print(f"Test R^2 Score: {r2}")
+print(f"Test Mean Squared Error: {mse}")
