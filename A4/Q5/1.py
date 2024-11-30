@@ -14,20 +14,20 @@ train_data = pd.read_csv('../processed_train_data.csv')
 
 X = train_data.drop(columns=['Price_Category'])
 y = train_data['Price_Category']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Display initial distribution
 print("Original Training Set Distribution:")
 print(y_train.value_counts())
 
-# Initialize SMOTE and apply
+# Apply SMOTE
 smote = SMOTE(random_state=42)
 X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
 print("\nSMOTE Distribution:")
 print(y_train_smote.value_counts())
 
 # Introduce artificial imbalance
-undersampler = RandomUnderSampler(sampling_strategy={'Low': 100, 'Medium': 100, 'High': 100, 'Very High': 50})
+undersampler = RandomUnderSampler(sampling_strategy={0: 100, 1: 100, 2: 100, 3: 50})
 X_train_imbalanced, y_train_imbalanced = undersampler.fit_resample(X_train, y_train)
 
 print("\nImbalanced Training Set Distribution (Before ADASYN):")
@@ -45,7 +45,7 @@ plt.figure(figsize=(12, 6))
 # SMOTE
 plt.subplot(1, 2, 1)
 smote_counts = y_train_smote.value_counts()
-plt.bar(smote_counts.index, smote_counts.values, color='skyblue', edgecolor='black')
+plt.bar(smote_counts.index.astype(str), smote_counts.values, color='skyblue', edgecolor='black')
 plt.title("SMOTE Distribution")
 plt.xlabel("Price Categories")
 plt.ylabel("Number of Samples")
@@ -53,12 +53,15 @@ plt.ylabel("Number of Samples")
 # ADASYN
 plt.subplot(1, 2, 2)
 adasyn_counts = y_train_adasyn.value_counts()
-plt.bar(adasyn_counts.index, adasyn_counts.values, color='orange', edgecolor='black')
+plt.bar(adasyn_counts.index.astype(str), adasyn_counts.values, color='orange', edgecolor='black')
 plt.title("ADASYN Distribution")
 plt.xlabel("Price Categories")
 plt.ylabel("Number of Samples")
 
 plt.tight_layout()
+
+output_path = "Plots/SMOTE_and_ADASYN_distribution.png"
+plt.savefig(output_path, bbox_inches='tight')
 plt.show()
 
 # Train Decision Tree Classifier on SMOTE-balanced data
@@ -73,10 +76,10 @@ y_pred_adasyn = dt_adasyn.predict(X_test)
 
 # Evaluate SMOTE model
 print("\nSMOTE Model Performance:")
-print(classification_report(y_test, y_pred_smote))
+print(classification_report(y_test, y_pred_smote, target_names=['0', '1', '2', '3']))
 print(f"SMOTE Accuracy: {accuracy_score(y_test, y_pred_smote):.2f}\n")
 
 # Evaluate ADASYN model
 print("\nADASYN Model Performance:")
-print(classification_report(y_test, y_pred_adasyn))
+print(classification_report(y_test, y_pred_adasyn, target_names=['0', '1', '2', '3']))
 print(f"ADASYN Accuracy: {accuracy_score(y_test, y_pred_adasyn):.2f}")
