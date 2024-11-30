@@ -14,14 +14,14 @@ y = train_data['Price']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Training Decision Tree on processed data
-model_scaled = DecisionTreeRegressor(random_state=42)
-model_scaled.fit(X_train, y_train)
+model = DecisionTreeRegressor(random_state=42)
+model.fit(X_train, y_train)
 
-print(f"Decision Tree Depth: {model_scaled.get_depth()}")
-print(f"Number of Leaves: {model_scaled.get_n_leaves()}")
+print(f"Decision Tree Depth: {model.get_depth()}")
+print(f"Number of Leaves: {model.get_n_leaves()}")
 
 plt.figure(figsize=(20, 10))
-plot_tree(model_scaled, feature_names=X_train.columns, filled=True, rounded=True, fontsize=10)
+plot_tree(model, feature_names=X_train.columns, filled=True, rounded=True, fontsize=10)
 plt.title("Decision Tree Structure")
 
 output_path = "Plots/decision_tree_structure.png"
