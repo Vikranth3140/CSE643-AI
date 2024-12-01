@@ -32,7 +32,6 @@ print(y_train.value_counts())
 undersampler = RandomUnderSampler(random_state=42)
 X_train_under, y_train_under = undersampler.fit_resample(X_train, y_train)
 
-# Save undersampled data to CSV
 undersampled_data = pd.concat([X_train_under, y_train_under], axis=1)
 undersampled_data.to_csv('undersampled_data.csv', index=False)
 
@@ -43,7 +42,6 @@ print(y_train_under.value_counts())
 oversampler = RandomOverSampler(random_state=42)
 X_train_over, y_train_over = oversampler.fit_resample(X_train, y_train)
 
-# Save oversampled data to CSV
 oversampled_data = pd.concat([X_train_over, y_train_over], axis=1)
 oversampled_data.to_csv('oversampled_data.csv', index=False)
 
@@ -55,6 +53,7 @@ sns.barplot(x=y_train_under.value_counts().index, y=y_train_under.value_counts()
 plt.title('Distribution After Random Undersampling')
 plt.xlabel('Price Category')
 plt.ylabel('Number of Samples')
+
 output_path = "Plots/undersampling_price_category_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
 plt.show()
@@ -64,6 +63,7 @@ sns.barplot(x=y_train_over.value_counts().index, y=y_train_over.value_counts().v
 plt.title('Distribution After Random Oversampling')
 plt.xlabel('Price Category')
 plt.ylabel('Number of Samples')
+
 output_path = "Plots/oversampling_price_category_distribution.png"
 plt.savefig(output_path, bbox_inches='tight')
 plt.show()
