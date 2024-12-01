@@ -5,7 +5,8 @@ from imblearn.over_sampling import RandomOverSampler
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-train_data = pd.read_csv('../dataset/train.csv')
+# train_data = pd.read_csv('../dataset/train.csv')
+train_data = pd.read_csv('dropped_cols_train_data.csv')
 
 def categorize_price(price):
     if price < train_data['Price'].quantile(0.25):

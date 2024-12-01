@@ -5,7 +5,8 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-train_data = pd.read_csv('../dataset/train.csv')
+# train_data = pd.read_csv('../dataset/train.csv')
+train_data = pd.read_csv('dropped_cols_train_data.csv')
 
 plt.figure(figsize=(10, 6))
 plt.hist(train_data['Price'], bins=10, color='skyblue', edgecolor='black')

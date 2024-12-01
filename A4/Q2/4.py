@@ -4,7 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error
 
-train_data = pd.read_csv('../dataset/train.csv')
+# train_data = pd.read_csv('../dataset/train.csv')
+train_data = pd.read_csv('dropped_cols_train_data.csv')
 
 # First we encode the categorical columns and then scale the numerical columns
 
