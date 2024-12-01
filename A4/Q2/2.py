@@ -27,6 +27,10 @@ if 'Price' in correlation_matrix.columns:
 else:
     print("Target variable 'Price' is not found in the correlation matrix.")
 
+dropped_cols_data_path = "dropped_cols_train_data.csv"
+train_data.to_csv(dropped_cols_data_path, index=False)
+print(f"\nProcessed train data saved to: {dropped_cols_data_path}")
+
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 plt.title("Correlation Matrix")
