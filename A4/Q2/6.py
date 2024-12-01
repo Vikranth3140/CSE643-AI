@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 train_data = pd.read_csv('dropped_cols_train_data.csv')
 
 def categorize_price(price):
-    if price < train_data['Price'].quantile(0.25):
+    if price < 10000000:
         return 'Low'
-    elif price < train_data['Price'].quantile(0.5):
+    elif 10000000 <= price < 20000000:
         return 'Medium'
-    elif price < train_data['Price'].quantile(0.75):
+    elif 20000000 <= price < 40000000:
         return 'High'
     else:
         return 'Very High'
