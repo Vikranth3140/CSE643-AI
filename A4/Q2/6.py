@@ -20,7 +20,7 @@ def categorize_price(price):
 
 train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
 
-X = train_data.drop(columns=['Price', 'Price_Category', 'Address', 'Possesion', 'Furnishing'])
+X = train_data.drop(columns=['Price_Category'])
 y = train_data['Price_Category']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
