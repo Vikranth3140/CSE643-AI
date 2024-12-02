@@ -17,18 +17,6 @@ if 'Price' in correlation_matrix.columns:
 
     train_data = train_data.drop(columns=weak_correlation_columns)
 
-def categorize_price(price):
-    if price < train_data['Price'].quantile(0.25):
-        return 'Low'
-    elif price < train_data['Price'].quantile(0.5):
-        return 'Medium'
-    elif price < train_data['Price'].quantile(0.75):
-        return 'High'
-    else:
-        return 'Very High'
-
-train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
-
 categorical_columns = train_data.select_dtypes(include=['object']).columns
 
 # Label encoding the categorical columns
@@ -45,6 +33,18 @@ scaler = StandardScaler()
 scaled_features = scaler.fit_transform(train_data[numerical_columns])
 
 train_data[numerical_columns] = scaled_features
+
+def categorize_price(price):
+    if price < 10000000:
+        return 'Low'
+    elif 10000000 <= price < 20000000:
+        return 'Medium'
+    elif 20000000 <= price < 40000000:
+        return 'High'
+    else:
+        return 'Very High'
+
+train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
 
 output_csv_path = "../processed_train_data.csv"
 train_data.to_csv(output_csv_path, index=False)
