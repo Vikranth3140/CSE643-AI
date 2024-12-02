@@ -21,9 +21,9 @@ y_test = test_data['Price']
 # `ccp_alpha` = 31941543.737055868 is the best hyperparameter
 model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=10,
+    max_depth=None,
     max_features=None,
-    min_samples_leaf=2,
+    min_samples_leaf=1,
     min_samples_split=2,
     ccp_alpha=31941543.737055868
 )
