@@ -65,6 +65,6 @@ plt.ylabel('Predicted Price')
 plt.title('Predicted vs Actual Prices')
 plt.legend()
 
-output_path = "predicted_vs_actual_prices.png"
+output_path = "Plots/predicted_vs_actual_prices.png"
 plt.savefig(output_path, bbox_inches='tight')
 plt.show()
