@@ -68,12 +68,12 @@ def categorize_price(price):
     else:
         return 'Very High'
 
-train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
-test_data['Price_Category'] = test_data['Price'].apply(categorize_price)
+X_train_final['Price_Category'] = X_train_final['Price'].apply(categorize_price)
+X_test_final['Price_Category'] = X_test_final['Price'].apply(categorize_price)
 
-print(train_data[['Price', 'Price_Category']].head())
+print(X_train_final[['Price', 'Price_Category']].head())
 
-category_counts = train_data['Price_Category'].value_counts()
+category_counts = X_train_final['Price_Category'].value_counts()
 
 # Plot the distribution of price categories
 plt.figure(figsize=(8, 6))

@@ -85,3 +85,9 @@ print(f"R² Score (Scaled Data): {r2_scaled}")
 
 mae_scaled = mean_absolute_error(y_test, y_pred_scaled)
 print(f"Mean Absolute Error (Scaled Data): {mae_scaled}")
+
+X_train_final.to_csv('scaled_train_data.csv', index=False)
+print("\nScaled data saved to 'scaled_train_data.csv'")
+
+X_test_final.to_csv('scaled_test_data.csv', index=False)
+print("Scaled data saved to 'scaled_test_data.csv'")
