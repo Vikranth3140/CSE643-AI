@@ -6,6 +6,7 @@ import os
 os.makedirs("Plots", exist_ok=True)
 
 train_data = pd.read_csv('../dataset/train.csv')
+test_data = pd.read_csv('../dataset/test.csv')
 
 numerical_data = train_data.select_dtypes(include=['float64', 'int64'])
 
@@ -21,15 +22,19 @@ if 'Price' in correlation_matrix.columns:
     print(weak_correlation_columns)
 
     train_data = train_data.drop(columns=weak_correlation_columns)
+    test_data = test_data.drop(columns=weak_correlation_columns)
 
     for column in weak_correlation_columns:
         print(f"Column '{column}' was dropped due to weak correlation ({target_correlation[column]:.2f}) with 'Price'.")
 else:
     print("Target variable 'Price' is not found in the correlation matrix.")
 
-dropped_cols_data_path = "dropped_cols_train_data.csv"
-train_data.to_csv(dropped_cols_data_path, index=False)
-print(f"\nProcessed train data saved to: {dropped_cols_data_path}")
+dropped_cols_data_path_train = "dropped_cols_train_data.csv"
+dropped_cols_data_path_test = "dropped_cols_test_data.csv"
+train_data.to_csv(dropped_cols_data_path_train, index=False)
+test_data.to_csv(dropped_cols_data_path_test, index=False)
+print(f"\nProcessed train data saved to: {dropped_cols_data_path_train}")
+print(f"\nProcessed test data saved to: {dropped_cols_data_path_test}")
 
 plt.figure(figsize=(10, 8))
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")

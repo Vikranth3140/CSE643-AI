@@ -7,7 +7,9 @@ import os
 os.makedirs("Plots", exist_ok=True)
 
 # train_data = pd.read_csv('../dataset/train.csv')
+# test_data = pd.read_csv('../dataset/test.csv')
 train_data = pd.read_csv('dropped_cols_train_data.csv')
+test_data = pd.read_csv('dropped_cols_test_data.csv')
 
 # First we encode the categorical columns and then scale the numerical columns
 
@@ -20,16 +22,30 @@ label_encoder = LabelEncoder()
 
 for col in categorical_columns:
     train_data[col] = label_encoder.fit_transform(train_data[col])
+    test_data[col] = label_encoder.fit_transform(test_data[col])
     print(f"Column '{col}' encoded with Label Encoding.")
 
 numerical_columns = train_data.select_dtypes(include=['float64', 'int64']).columns
 
-# Scaling the numerical columns
+# Scaled data
+columns_to_exclude = ['Price', 'Address', 'Possesion', 'Furnishing']
+numerical_columns_to_scale = [col for col in train_data.select_dtypes(include=['float64', 'int64']).columns if col not in columns_to_exclude]
+
+# Apply StandardScaler to scale the features
 scaler = StandardScaler()
 
-scaled_features = scaler.fit_transform(train_data[numerical_columns])
+X_train_scaled_numerical = scaler.fit_transform(train_data[numerical_columns_to_scale])
+X_test_scaled_numerical = scaler.transform(test_data[numerical_columns_to_scale])
 
-train_data[numerical_columns] = scaled_features
+X_train_scaled_numerical_df = pd.DataFrame(X_train_scaled_numerical, columns=numerical_columns_to_scale)
+X_test_scaled_numerical_df = pd.DataFrame(X_test_scaled_numerical, columns=numerical_columns_to_scale)
+
+excluded_columns_train = train_data[columns_to_exclude].reset_index(drop=True)
+excluded_columns_test = test_data[columns_to_exclude].reset_index(drop=True)
+
+X_train_final = pd.concat([X_train_scaled_numerical_df, excluded_columns_train], axis=1)
+X_test_final = pd.concat([X_test_scaled_numerical_df, excluded_columns_test], axis=1)
+
 
 plt.figure(figsize=(10, 6))
 plt.hist(train_data['Price'], bins=10, color='skyblue', edgecolor='black')
@@ -53,6 +69,7 @@ def categorize_price(price):
         return 'Very High'
 
 train_data['Price_Category'] = train_data['Price'].apply(categorize_price)
+test_data['Price_Category'] = test_data['Price'].apply(categorize_price)
 
 print(train_data[['Price', 'Price_Category']].head())
 
