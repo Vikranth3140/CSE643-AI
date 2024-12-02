@@ -51,7 +51,7 @@ print(f"Mean Absolute Error (Unscaled Data): {mae_unscaled}")
 
 
 # Scaled data
-columns_to_exclude = ['Price', 'Address', 'Possesion', 'Furnishing']
+columns_to_exclude = ['Price', 'Address', 'Furnishing']
 numerical_columns_to_scale = [col for col in train_data.select_dtypes(include=['float64', 'int64']).columns if col not in columns_to_exclude]
 
 y_train = train_data['Price']

@@ -23,6 +23,9 @@ if 'Price' in correlation_matrix.columns:
 
     train_data = train_data.drop(columns=weak_correlation_columns)
     test_data = test_data.drop(columns=weak_correlation_columns)
+    
+    train_data = train_data.drop(columns='Possesion')
+    test_data = test_data.drop(columns='Possesion')
 
     for column in weak_correlation_columns:
         print(f"Column '{column}' was dropped due to weak correlation ({target_correlation[column]:.2f}) with 'Price'.")

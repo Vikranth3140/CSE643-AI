@@ -28,7 +28,7 @@ for col in categorical_columns:
 numerical_columns = train_data.select_dtypes(include=['float64', 'int64']).columns
 
 # Scaled data
-columns_to_exclude = ['Price', 'Address', 'Possesion', 'Furnishing']
+columns_to_exclude = ['Price', 'Address', 'Furnishing']
 numerical_columns_to_scale = [col for col in train_data.select_dtypes(include=['float64', 'int64']).columns if col not in columns_to_exclude]
 
 # Apply StandardScaler to scale the features
