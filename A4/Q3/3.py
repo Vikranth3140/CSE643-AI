@@ -7,12 +7,12 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
-# test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 # train_data = pd.read_csv('../Q2/undersampled_train_data.csv')
 # test_data = pd.read_csv('../Q2/undersampled_test_data.csv')
-train_data = pd.read_csv('../Q2/oversampled_train_data.csv')
-test_data = pd.read_csv('../Q2/oversampled_test_data.csv')
+# train_data = pd.read_csv('../Q2/oversampled_train_data.csv')
+# test_data = pd.read_csv('../Q2/oversampled_test_data.csv')
 
 X_train = train_data.drop(columns=['Price', 'Price_Category'])
 y_train = train_data['Price']
@@ -25,8 +25,8 @@ model = DecisionTreeRegressor(
     random_state=42,
     max_depth=None,
     max_features=None,
-    min_samples_leaf=2,
-    min_samples_split=5
+    min_samples_leaf=1,
+    min_samples_split=2
 )
 model.fit(X_train, y_train)
 
