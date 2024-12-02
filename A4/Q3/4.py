@@ -1,6 +1,6 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, cross_val_score, learning_curve
-from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.model_selection import cross_val_score, learning_curve
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,21 +8,24 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../dataset/train.csv')
-train_data = pd.read_csv('../processed_train_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 
-X = train_data.drop(columns=['Price'])
-y = train_data['Price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = train_data.drop(columns=['Price', 'Price_Category'])
+y_train = train_data['Price']
+
+X_test = test_data.drop(columns=['Price', 'Price_Category'])
+y_test = test_data['Price']
 
 # Training Decision Tree on processed data using the Best Hyperparameters found in 2b
-# Do not need to prune the tree as `ccp_alpha` = 0 is the best hyperparameter
+# `ccp_alpha` = 31941543.737055868 is the best hyperparameter
 model = DecisionTreeRegressor(
     random_state=42,
     max_depth=10,
     max_features=None,
     min_samples_leaf=2,
-    min_samples_split=2
+    min_samples_split=2,
+    ccp_alpha=31941543.737055868
 )
 model.fit(X_train, y_train)
 
@@ -30,8 +33,8 @@ model.fit(X_train, y_train)
 # We use Negative MSE as the scoring metric
 cv_mse = cross_val_score(
     model,
-    X,
-    y,
+    X_train,
+    y_train,
     cv=5,
     scoring='neg_mean_squared_error'
 )
@@ -42,8 +45,8 @@ print("Mean CV MSE:", np.mean(cv_mse))
 # Implement Learning Curves
 train_sizes, train_scores, validation_scores = learning_curve(
     model,
-    X,
-    y,
+    X_train,
+    y_train,
     train_sizes=np.linspace(0.1, 1.0, 10),
     cv=5,
     scoring='neg_mean_squared_error',
