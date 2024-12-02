@@ -68,10 +68,10 @@ print(f"Optimal ccp_alpha: {optimal_alpha}")
 # Retrain the Tree with Optimal ccp_alpha
 pruned_model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=None,
+    max_depth=10,
     max_features=None,
     min_samples_leaf=1,
-    min_samples_split=2,
+    min_samples_split=5,
     ccp_alpha=optimal_alpha
 )
 pruned_model.fit(X_train, y_train)

@@ -22,14 +22,14 @@ X_test = test_data.drop(columns=['Price', 'Price_Category'])
 y_test = test_data['Price']
 
 # Training Decision Tree on processed data using the Best Hyperparameters found in 2b
-# `ccp_alpha` = 31941543.737055868 is the best hyperparameter
+# `ccp_alpha` = 42035836.073539406 is the best hyperparameter
 model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=None,
+    max_depth=10,
     max_features=None,
     min_samples_leaf=1,
-    min_samples_split=2,
-    ccp_alpha=31941543.737055868
+    min_samples_split=5,
+    ccp_alpha=42035836.073539406
 )
 model.fit(X_train, y_train)
 
