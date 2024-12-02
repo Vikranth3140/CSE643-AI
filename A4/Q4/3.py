@@ -8,27 +8,30 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../dataset/train.csv')
-train_data = pd.read_csv('../processed_train_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 
-X = train_data.drop(columns=['Price'])
-y = train_data['Price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = train_data.drop(columns=['Price', 'Price_Category'])
+y_train = train_data['Price']
+
+X_test = test_data.drop(columns=['Price', 'Price_Category'])
+y_test = test_data['Price']
 
 # Training Decision Tree on processed data using the Best Hyperparameters found in 2b
-# Do not need to prune the tree as `ccp_alpha` = 0 is the best hyperparameter
+# `ccp_alpha` = 31941543.737055868 is the best hyperparameter
 model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=10,
+    max_depth=None,
     max_features=None,
-    min_samples_leaf=2,
-    min_samples_split=2
+    min_samples_leaf=1,
+    min_samples_split=2,
+    ccp_alpha=31941543.737055868
 )
 model.fit(X_train, y_train)
 
 # Identify Top 3 Important Features
 feature_importances = model.feature_importances_
-important_features = pd.Series(feature_importances, index=X.columns).sort_values(ascending=False)
+important_features = pd.Series(feature_importances, index=X_train.columns).sort_values(ascending=False)
 top_3_features = important_features.head(3).index
 print("Top 3 Important Features:\n", important_features.head(3))
 
@@ -47,7 +50,7 @@ for feature in top_3_features:
 # Calculate RMSE for Each Feature
 for feature in top_3_features:
     X_feature = train_data[[feature]]
-    X_train_feat, X_test_feat, y_train_feat, y_test_feat = train_test_split(X_feature, y, test_size=0.2, random_state=42)
+    X_train_feat, X_test_feat, y_train_feat, y_test_feat = train_test_split(X_feature, y_train, test_size=0.2, random_state=42)
 
     feature_model = DecisionTreeRegressor(
         random_state=42,
