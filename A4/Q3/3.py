@@ -23,7 +23,7 @@ y_test = test_data['Price']
 # Training Decision Tree on processed data using the Best Hyperparameters found in 2b
 model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=10,
+    max_depth=None,
     max_features=None,
     min_samples_leaf=2,
     min_samples_split=5

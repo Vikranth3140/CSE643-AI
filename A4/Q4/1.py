@@ -5,10 +5,10 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
-# test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
-train_data = pd.read_csv('../Q2/undersampled_train_data.csv')
-test_data = pd.read_csv('../Q2/undersampled_test_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
+# train_data = pd.read_csv('../Q2/undersampled_train_data.csv')
+# test_data = pd.read_csv('../Q2/undersampled_test_data.csv')
 # train_data = pd.read_csv('../Q2/oversampled_train_data.csv')
 # test_data = pd.read_csv('../Q2/oversampled_test_data.csv')
 
@@ -26,7 +26,7 @@ model = DecisionTreeRegressor(
     max_features=None,
     min_samples_leaf=2,
     min_samples_split=5,
-    ccp_alpha=90998981.82955986
+    ccp_alpha=22217164.00379489
 )
 model.fit(X_train, y_train)
 
