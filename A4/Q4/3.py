@@ -32,11 +32,16 @@ model = DecisionTreeRegressor(
 )
 model.fit(X_train, y_train)
 
+# Overall RMSE
+y_pred = model.predict(X_test)
+overall_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print(f"Overall Model RMSE: {overall_rmse}")
+
 # Identify Top 3 Important Features
 feature_importances = model.feature_importances_
 important_features = pd.Series(feature_importances, index=X_train.columns).sort_values(ascending=False)
 top_3_features = important_features.head(3).index
-print("Top 3 Important Features:\n", important_features.head(3))
+print("\nTop 3 Important Features:\n", important_features.head(3))
 
 for feature in top_3_features:
     plt.figure(figsize=(8, 6))
@@ -52,17 +57,17 @@ for feature in top_3_features:
 
 # Calculate RMSE for Each Feature
 for feature in top_3_features:
-    X_train_feature = X_train[[feature]]
-    X_test_feature = X_test[[feature]]
+    X_test_temp = X_test.copy()
+    X_test_temp.loc[:, X_test_temp.columns != feature] = 0
 
-    feature_model = DecisionTreeRegressor(
-        random_state=42,
-        max_depth=10,
-        min_samples_leaf=2,
-        min_samples_split=2
-    )
-    feature_model.fit(X_train_feature, y_train)
-
-    y_pred_feature = feature_model.predict(X_test_feature)
+    y_pred_feature = model.predict(X_test_temp)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred_feature))
     print(f"RMSE when using only {feature}: {rmse}")
+
+rmse_results = {
+    'Overall RMSE': overall_rmse,
+    **{f"{feature} RMSE": np.sqrt(mean_squared_error(y_test, model.predict(X_test.assign(**{col: 0 for col in X_test.columns if col != feature})))) for feature in top_3_features}
+}
+print("\nRMSE Results:")
+for key, value in rmse_results.items():
+    print(f"{key}: {value}")
