@@ -3,8 +3,12 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 
-train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
-test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
+# train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+# test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
+# train_data = pd.read_csv('../Q2/undersampled_train_data.csv')
+# test_data = pd.read_csv('../Q2/undersampled_test_data.csv')
+train_data = pd.read_csv('../Q2/oversampled_train_data.csv')
+test_data = pd.read_csv('../Q2/oversampled_test_data.csv')
 
 X_train = train_data.drop(columns=['Price', 'Price_Category'])
 y_train = train_data['Price']
