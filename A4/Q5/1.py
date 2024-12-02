@@ -9,12 +9,14 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../dataset/train.csv')
-train_data = pd.read_csv('../processed_train_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 
-X = train_data.drop(columns=['Price_Category'])
-y = train_data['Price_Category']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+X_train = train_data.drop(columns=['Price', 'Price_Category'])
+y_train = train_data['Price']
+
+X_test = test_data.drop(columns=['Price', 'Price_Category'])
+y_test = test_data['Price']
 
 # Display initial distribution
 print("Original Training Set Distribution:")
