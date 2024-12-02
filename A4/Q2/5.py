@@ -71,6 +71,13 @@ def categorize_price(price):
 X_train_final['Price_Category'] = X_train_final['Price'].apply(categorize_price)
 X_test_final['Price_Category'] = X_test_final['Price'].apply(categorize_price)
 
+X_train_final.to_csv("X_train_final_with_categories.csv", index=False)
+X_test_final.to_csv("X_test_final_with_categories.csv", index=False)
+
+print("Final train and test datasets with 'Price_Category' saved successfully:")
+print("- X_train_final_with_categories.csv")
+print("- X_test_final_with_categories.csv")
+
 print(X_train_final[['Price', 'Price_Category']].head())
 
 category_counts = X_train_final['Price_Category'].value_counts()
