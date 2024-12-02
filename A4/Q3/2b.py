@@ -1,14 +1,16 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score, mean_squared_error
 
-# train_data = pd.read_csv('../dataset/train.csv')
-train_data = pd.read_csv('../processed_train_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 
-X = train_data.drop(columns=['Price'])
-y = train_data['Price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = train_data.drop(columns=['Price', 'Price_Category'])
+y_train = train_data['Price']
+
+X_test = test_data.drop(columns=['Price', 'Price_Category'])
+y_test = test_data['Price']
 
 # Hyperparameter Optimization using Grid Search
 
@@ -36,4 +38,4 @@ r2 = r2_score(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 
 print(f"\nR2 Score: {r2}")
-print(f"\nMean Squared Error (Tuned Model): {mse}")
+print(f"Mean Squared Error (Tuned Model): {mse}")
