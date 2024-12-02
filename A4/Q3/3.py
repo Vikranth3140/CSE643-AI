@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor, plot_tree
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score, mean_squared_error
@@ -8,12 +7,14 @@ import os
 
 os.makedirs("Plots", exist_ok=True)
 
-# train_data = pd.read_csv('../dataset/train.csv')
-train_data = pd.read_csv('../processed_train_data.csv')
+train_data = pd.read_csv('../Q2/X_train_final_with_categories.csv')
+test_data = pd.read_csv('../Q2/X_test_final_with_categories.csv')
 
-X = train_data.drop(columns=['Price'])
-y = train_data['Price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = train_data.drop(columns=['Price', 'Price_Category'])
+y_train = train_data['Price']
+
+X_test = test_data.drop(columns=['Price', 'Price_Category'])
+y_test = test_data['Price']
 
 # Training Decision Tree on processed data using the Best Hyperparameters found in 2b
 model = DecisionTreeRegressor(
@@ -63,9 +64,9 @@ print(f"Optimal ccp_alpha: {optimal_alpha}")
 # Retrain the Tree with Optimal ccp_alpha
 pruned_model = DecisionTreeRegressor(
     random_state=42,
-    max_depth=10,
+    max_depth=None,
     max_features=None,
-    min_samples_leaf=2,
+    min_samples_leaf=1,
     min_samples_split=2,
     ccp_alpha=optimal_alpha
 )
@@ -79,17 +80,17 @@ print(f"Pruned Model R2 Score: {r2}")
 print(f"Pruned Model Mean Squared Error: {final_mse}")
 
 plt.figure(figsize=(20, 10))
-plot_tree(model, filled=True, feature_names=X.columns, rounded=True)
+plot_tree(model, filled=True, feature_names=X_train.columns, rounded=True)
 plt.title("Decision Tree Before Pruning")
 
 output_path = "Plots/unpruned_decision_tree.png"
 plt.savefig(output_path, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 plt.figure(figsize=(20, 10))
-plot_tree(pruned_model, filled=True, feature_names=X.columns, rounded=True)
+plot_tree(pruned_model, filled=True, feature_names=X_train.columns, rounded=True)
 plt.title("Decision Tree After Pruning")
 
 output_path = "Plots/pruned_decision_tree.png"
 plt.savefig(output_path, bbox_inches='tight')
-plt.show()
+# plt.show()
