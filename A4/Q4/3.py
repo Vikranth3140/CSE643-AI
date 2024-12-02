@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt
@@ -49,8 +48,8 @@ for feature in top_3_features:
 
 # Calculate RMSE for Each Feature
 for feature in top_3_features:
-    X_feature = train_data[[feature]]
-    X_train_feat, X_test_feat, y_train_feat, y_test_feat = train_test_split(X_feature, y_train, test_size=0.2, random_state=42)
+    X_train_feature = X_train[[feature]]
+    X_test_feature = X_test[[feature]]
 
     feature_model = DecisionTreeRegressor(
         random_state=42,
@@ -58,8 +57,8 @@ for feature in top_3_features:
         min_samples_leaf=2,
         min_samples_split=2
     )
-    feature_model.fit(X_train_feat, y_train_feat)
+    feature_model.fit(X_train_feature, y_train)
 
-    y_pred_feat = feature_model.predict(X_test_feat)
-    rmse = np.sqrt(mean_squared_error(y_test_feat, y_pred_feat))
+    y_pred_feature = feature_model.predict(X_test_feature)
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred_feature))
     print(f"RMSE when using only {feature}: {rmse}")
